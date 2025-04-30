@@ -1,0 +1,15 @@
+D:\Projects\PC-Configurator\PC-Configurator\bin\Debug\PC-Configurator.exe.config
+D:\Projects\PC-Configurator\PC-Configurator\bin\Debug\PC-Configurator.exe
+D:\Projects\PC-Configurator\PC-Configurator\bin\Debug\PC-Configurator.pdb
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.csproj.AssemblyReference.cache
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\MainWindow.g.cs
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\App.g.cs
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator_MarkupCompile.cache
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator_MarkupCompile.lref
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\MainWindow.baml
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.g.resources
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC_Configurator.Properties.Resources.resources
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.csproj.GenerateResource.cache
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.csproj.CoreCompileInputs.cache
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.exe
+D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.pdb

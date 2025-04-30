@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: pcapp-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root  
+      MYSQL_DATABASE: pcapp     
+    volumes:
+      - db_data:/var/lib/mysql  
+    ports:
+      - "3306:3306"  
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: pcapp-phpmyadmin
+    environment:
+      PMA_HOST: db  
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"  
+    depends_on:
+      - db  
+
+volumes:
+  db_data:
+    driver: local
