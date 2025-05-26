@@ -5,8 +5,41 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PC_Configurator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Számítógép Konfigurátor" Height="450" Width="800"
+        Background="#1E1E1E" Foreground="White">
     <Grid>
-        
+        <StackPanel Margin="30" VerticalAlignment="Center">
+            <!-- Alkalmazás címe -->
+            <TextBlock Text="Számítógép Konfigurátor"
+                       FontSize="28" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+            <!-- Gombok rácsban elrendezve -->
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Regisztráció gomb -->
+                <Button Grid.Column="0"
+                        Name="btnRegister" Content="Regisztráció"
+                        Width="180" Height="50"
+                        Click="BtnRegister_Click"
+                        Background="#4A90E2" Foreground="White"
+                        FontSize="16" Padding="10" BorderThickness="0"
+                        Cursor="Hand"/>
+
+                <!-- Bejelentkezés gomb -->
+                <Button Grid.Column="1"
+                        Name="btnLogin" Content="Bejelentkezés"
+                        Width="180" Height="50"
+                        Margin="10,0,0,0"
+                        Click="BtnLogin_Click"
+                        Background="#50E3C2" Foreground="White"
+                        FontSize="16" Padding="10" BorderThickness="0"
+                        Cursor="Hand"/>
+            </Grid>
+        </StackPanel>
     </Grid>
 </Window>
