@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PC_Configurator"
         mc:Ignorable="d"
-        Title="Számítógép Konfigurátor" Height="450" Width="800"
-        Background="#1E1E1E" Foreground="White">
+        Title="Számítógép Konfigurátor" Height="450" Width="600"
+        Background="#1E1E1E" Foreground="White"
+        WindowStartupLocation="CenterScreen">
     <Grid>
         <StackPanel Margin="30" VerticalAlignment="Center">
             <!-- Alkalmazás címe -->
@@ -24,20 +25,20 @@
                 <!-- Regisztráció gomb -->
                 <Button Grid.Column="0"
                         Name="btnRegister" Content="Regisztráció"
-                        Width="180" Height="50"
+                        Width="200" Height="60"
                         Click="BtnRegister_Click"
                         Background="#4A90E2" Foreground="White"
-                        FontSize="16" Padding="10" BorderThickness="0"
+                        FontSize="22" FontWeight="Bold" Padding="16" BorderThickness="0"
                         Cursor="Hand"/>
 
                 <!-- Bejelentkezés gomb -->
                 <Button Grid.Column="1"
                         Name="btnLogin" Content="Bejelentkezés"
-                        Width="180" Height="50"
-                        Margin="10,0,0,0"
+                        Width="200" Height="60"
+                        Margin="16,0,0,0"
                         Click="BtnLogin_Click"
                         Background="#50E3C2" Foreground="White"
-                        FontSize="16" Padding="10" BorderThickness="0"
+                        FontSize="22" FontWeight="Bold" Padding="16" BorderThickness="0"
                         Cursor="Hand"/>
             </Grid>
         </StackPanel>

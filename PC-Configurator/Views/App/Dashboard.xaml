@@ -1,0 +1,186 @@
+﻿<Window x:Class="PC_Configurator.Views.App.Dashboard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dashboard"
+        WindowState="Maximized"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="#181C24"
+        Foreground="White">
+    <Window.Resources>
+        <Style x:Key="SidebarButton"
+                TargetType="Button">
+            <Setter Property="Background"
+                    Value="#232A36"/>
+            <Setter Property="Foreground"
+                    Value="#F5F6FA"/>
+            <Setter Property="FontSize"
+                    Value="20"/>
+            <Setter Property="FontWeight"
+                    Value="Bold"/>
+            <Setter Property="Margin"
+                    Value="18,18,18,18"/>
+            <Setter Property="Padding"
+                    Value="32,18,32,18"/>
+            <Setter Property="HorizontalContentAlignment"
+                    Value="Center"/>
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+            <Setter Property="Cursor"
+                    Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="16"
+                                BorderBrush="#4A90E2"
+                                BorderThickness="2"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="#4A90E2"/>
+                    <Setter Property="Foreground"
+                            Value="#F5F6FA"/>
+                    <Setter Property="BorderBrush"
+                            Value="#50E3C2"/>
+                    <Setter Property="BorderThickness"
+                            Value="2.5"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#50E3C2"
+                                    BlurRadius="16"
+                                    ShadowDepth="0"
+                                    Opacity="0.35"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="IsPressed"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="#50E3C2"/>
+                    <Setter Property="Foreground"
+                            Value="#181A20"/>
+                    <Setter Property="BorderBrush"
+                            Value="#4A90E2"/>
+                    <Setter Property="BorderThickness"
+                            Value="3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CardStyle"
+                TargetType="Border">
+            <Setter Property="Background"
+                    Value="#23272F"/>
+            <Setter Property="CornerRadius"
+                    Value="18"/>
+            <Setter Property="Padding"
+                    Value="36"/>
+            <Setter Property="Margin"
+                    Value="0,32,0,0"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#4A90E2"
+                            BlurRadius="18"
+                            ShadowDepth="0"
+                            Opacity="0.18"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="WelcomeText"
+                TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="30"/>
+            <Setter Property="FontWeight"
+                    Value="Bold"/>
+            <Setter Property="Foreground"
+                    Value="#F5F6FA"/>
+            <Setter Property="Margin"
+                    Value="0,0,0,16"/>
+        </Style>
+        <Style x:Key="EmailText"
+                TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="18"/>
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+            <Setter Property="Foreground"
+                    Value="#4A90E2"/>
+            <Setter Property="Margin"
+                    Value="0,0,0,28"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <!-- Sidebar -->
+        <Border Grid.Column="0"
+                Background="#1A1D23">
+            <StackPanel x:Name="SidebarMenu"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Margin="0,48,0,0"
+                    Width="220">
+                <TextBlock Text="PC Konfigurátor"
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Foreground="#4A90E2"
+                        Margin="0,0,0,40"
+                        HorizontalAlignment="Center"/>
+                <!-- Menüelemek dinamikusan -->
+            </StackPanel>
+        </Border>
+        <!-- Main Content -->
+        <Grid Grid.Column="1">
+            <Viewbox Stretch="Uniform"
+                    MaxWidth="600"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+                <Border Style="{StaticResource CardStyle}"
+                        MinWidth="320"
+                        MaxWidth="600">
+                    <StackPanel Margin="0,0,0,0">
+                        <TextBlock Text="Üdvözlünk a Dashboardon!"
+                                Style="{StaticResource WelcomeText}"
+                                HorizontalAlignment="Center"
+                                TextWrapping="Wrap"
+                                Margin="0,0,0,18"/>
+                        <TextBlock x:Name="EmailTextBlock"
+                                Text="email@example.com"
+                                Style="{StaticResource EmailText}"
+                                HorizontalAlignment="Center"
+                                TextWrapping="Wrap"
+                                Margin="0,0,0,10"/>
+                        <TextBlock x:Name="RoleTextBlock"
+                                Text=""
+                                Style="{StaticResource EmailText}"
+                                HorizontalAlignment="Center"
+                                TextWrapping="Wrap"
+                                Margin="0,0,0,18"/>
+                        <!-- További gombok, ha szükséges -->
+                        <TextBlock Text="Nagyon örülünk, hogy csatlakoztál a PC Konfigurátorhoz! 🎉"
+                                FontSize="16"
+                                Foreground="White"
+                                TextAlignment="Center"
+                                Margin="0,0,0,16"
+                                TextWrapping="Wrap"/>
+                        <TextBlock Text="Itt fogod tudni kezelni a konfigurációidat, fiókodat és még sok mást!"
+                                FontSize="14"
+                                Foreground="#B0BEC5"
+                                TextAlignment="Center"
+                                TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </Viewbox>
+        </Grid>
+    </Grid>
+</Window>

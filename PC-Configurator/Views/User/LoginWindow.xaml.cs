@@ -1,76 +1,135 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace PC_Configurator.Views
 {
     public partial class LoginWindow : Window
     {
+        private readonly string _connStr;
+
         public LoginWindow()
         {
             InitializeComponent();
+            _connStr = ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
         }
 
         private void ShowPasswordCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            // Logic to handle when the checkbox is checked
-            MessageBox.Show("Show password checked.");
+            // Optionally implement password reveal logic here
         }
 
         private void ShowPasswordCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Logic to handle when the checkbox is unchecked
-            MessageBox.Show("Show password unchecked.");
+            // Optionally implement password hide logic here
         }
+
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: bejelentkezési logika
-            string email = EmailTextBox.Text;
+            string email = EmailTextBox.Text.Trim();
             string password = PasswordBox.Password;
 
-            if (ValidateInput(email, password))
-            {
-                string passwordHash = HashPassword(password);
-                bool success = CheckCredentials(email, passwordHash);
+            if (!ValidateInput(email, password))
+                return;
 
-                if (success)
+            string passwordHash = HashPassword(password);
+            if (CheckCredentials(email, passwordHash))
+            {
+                string role = GetUserRole(email);
+                var dashboard = new App.Dashboard(email, role);
+                dashboard.Owner = this.Owner;
+                dashboard.Show();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Hibás email vagy jelszó");
+            }
+        }
+
+        private string GetUserRole(string email)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(_connStr))
                 {
-                    MessageBox.Show("Sikeres bejelentkezés");
-                    // TODO: továbbléptetés főképernyőre vagy dashboardra
+                    conn.Open();
+                    var cmd = new SqlCommand("SELECT Role FROM Users WHERE Email = @e", conn);
+                    cmd.Parameters.AddWithValue("@e", email);
+                    var result = cmd.ExecuteScalar();
+                    return result?.ToString() ?? "user";
                 }
-                else
-                {
-                    MessageBox.Show("Hibás email vagy jelszó");
-                }
+            }
+            catch
+            {
+                return "user";
             }
         }
 
         private bool ValidateInput(string email, string password)
         {
-            // TODO: bemenet validálása (formátum, hossz, stb.)
-            return true;
+            // TODO: Add real validation
+            return !string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password);
         }
 
         private string HashPassword(string password)
         {
-            // TODO: jelszó hash-elése
-            return password;
+            using (var sha = SHA256.Create())
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(password);
+                byte[] hash = sha.ComputeHash(bytes);
+                return BitConverter.ToString(hash).Replace("-", string.Empty);
+            }
         }
 
         private bool CheckCredentials(string email, string passwordHash)
         {
-            // TODO: adatbázisból lekérdezés és összehasonlítás
-            return false;
+            try
+            {
+                using (var conn = new SqlConnection(_connStr))
+                {
+                    conn.Open();
+                    var cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @e AND PasswordHash = @p", conn);
+                    cmd.Parameters.AddWithValue("@e", email);
+                    cmd.Parameters.AddWithValue("@p", passwordHash);
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        private void GoToRegisterButton_Click(object sender, RoutedEventArgs e)
+        {
+            var regWin = new RegistrationWindow();
+            regWin.Owner = this.Owner;
+            regWin.Show();
+            this.Close();
+        }
+
+        private void EmailTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                LoginButton_Click(sender, e);
+            }
+        }
+
+        private void PasswordBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                LoginButton_Click(sender, e);
+            }
         }
     }
 }

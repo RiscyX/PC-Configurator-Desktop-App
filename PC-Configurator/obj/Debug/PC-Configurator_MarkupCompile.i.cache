@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\App.xaml
-3-412876345
+41690540964
 
-8-2094254183
-13-1310406943
-MainWindow.xaml;Views\User\LoginWindow.xaml;Views\User\RegistrationWindow.xaml;
+9-2043697664
+14-207034072
+MainWindow.xaml;Views\App\Dashboard.xaml;Views\User\LoginWindow.xaml;Views\User\RegistrationWindow.xaml;
 
-False
+True
 
