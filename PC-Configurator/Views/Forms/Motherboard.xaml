@@ -11,13 +11,13 @@
             <StackPanel>
                 <TextBlock Text="Alaplap hozzáadása" Foreground="#F5F6FA" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,32"/>
                 <TextBlock Text="Név" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
-                <TextBox x:Name="NameTextBox" FontSize="22" Margin="0,0,0,16" Height="44"/>
+                <TextBox x:Name="NameTextBox" FontSize="22" Margin="0,0,0,16" Height="44" VerticalContentAlignment="Center"/>
                 <TextBlock Text="Gyártó" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
-                <TextBox x:Name="ManufacturerTextBox" FontSize="22" Margin="0,0,0,16" Height="44"/>
+                <TextBox x:Name="ManufacturerTextBox" FontSize="22" Margin="0,0,0,16" Height="44" VerticalContentAlignment="Center"/>
                 <TextBlock Text="Chipkészlet" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
-                <TextBox x:Name="ChipsetTextBox" FontSize="22" Margin="0,0,0,16" Height="44"/>
+                <TextBox x:Name="ChipsetTextBox" FontSize="22" Margin="0,0,0,16" Height="44" VerticalContentAlignment="Center"/>
                 <TextBlock Text="Foglalat" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
-                <TextBox x:Name="SocketTextBox" FontSize="22" Margin="0,0,0,32" Height="44"/>
+                <TextBox x:Name="SocketTextBox" FontSize="22" Margin="0,0,0,32" Height="44" VerticalContentAlignment="Center"/>
                 <Button Content="Mentés" Height="54" FontSize="22" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand"/>
             </StackPanel>
         </Border>
