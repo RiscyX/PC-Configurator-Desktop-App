@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using PC_Configurator.Views.App;
 namespace PC_Configurator.Views.App
 {
     /// <summary>
@@ -25,10 +26,17 @@ namespace PC_Configurator.Views.App
         public Dashboard(string userEmail, string userRole)
         {
             InitializeComponent();
-            EmailTextBlock.Text = userEmail;
-            RoleTextBlock.Text = $"Szerepkör: {userRole}";
             AddMenuItems(userRole);
+            // Set Profile as the default page
+            MainContentArea.Content = new PC_Configurator.Views.App.Profile(userEmail, userRole);
+            // Store for navigation if needed
+            this.UserEmail = userEmail;
+            this.UserRole = userRole;
         }
+
+        private string UserEmail;
+        private string UserRole;
+
 
         private void AddMenuItems(string userRole)
         {
@@ -43,22 +51,45 @@ namespace PC_Configurator.Views.App
             };
             SidebarMenu.Children.Add(title);
 
-            // Common menu items
-            SidebarMenu.Children.Add(CreateSidebarButton("Gépépítés"));
-            SidebarMenu.Children.Add(CreateSidebarButton("Konfigurációk"));
-            SidebarMenu.Children.Add(CreateSidebarButton("Fiókom"));
-
             // Admin-only menu items
             if (userRole == "admin")
             {
-                SidebarMenu.Children.Add(CreateSidebarButton("Felhasználók kezelése"));
-                SidebarMenu.Children.Add(CreateSidebarButton("Admin beállítások"));
+                SidebarMenu.Children.Add(CreateNavButton("Alkatrészek hozzáadása", typeof(PC_Configurator.Views.App.AddComponents)));
+                SidebarMenu.Children.Add(CreateNavButton("Admin beállítások", typeof(PC_Configurator.Views.App.AdminSettings)));
             }
+            // Common menu items
+            SidebarMenu.Children.Add(CreateNavButton("Gépépítés", typeof(PC_Configurator.Views.App.ConfigBuilder)));
+            SidebarMenu.Children.Add(CreateNavButton("Konfigurációk", typeof(PC_Configurator.Views.App.Configs)));
+            SidebarMenu.Children.Add(CreateNavButton("Fiókom", typeof(PC_Configurator.Views.App.Profile)));
 
             // Logout button (always visible)
             var logoutBtn = CreateSidebarButton("Kijelentkezés");
             logoutBtn.Click += LogoutButton_Click;
             SidebarMenu.Children.Add(logoutBtn);
+        }
+
+        private Button CreateNavButton(string text, System.Type userControlType)
+        {
+            var btn = new Button
+            {
+                Content = text,
+                Style = (Style)FindResource("SidebarButton"),
+                Margin = new Thickness(0, 8, 0, 0)
+            };
+            btn.Click += (s, e) =>
+            {
+                if (userControlType == typeof(PC_Configurator.Views.App.Profile))
+                {
+                    var profile = new PC_Configurator.Views.App.Profile(this.UserEmail, this.UserRole);
+                    MainContentArea.Content = profile;
+                }
+                else
+                {
+                    var control = (UserControl)Activator.CreateInstance(userControlType);
+                    MainContentArea.Content = control;
+                }
+            };
+            return btn;
         }
 
         private Button CreateSidebarButton(string text)
@@ -71,9 +102,6 @@ namespace PC_Configurator.Views.App
             };
         }
 
-        public Dashboard(string userEmail) : this(userEmail, "user")
-        {
-        }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {

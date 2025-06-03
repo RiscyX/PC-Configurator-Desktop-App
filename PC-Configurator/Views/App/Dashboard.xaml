@@ -119,7 +119,7 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="360"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <!-- Sidebar -->
@@ -129,58 +129,25 @@
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
                     Margin="0,48,0,0"
-                    Width="220">
+                    Width="300">
                 <TextBlock Text="PC Konfigurátor"
-                        FontSize="24"
+                        FontSize="32"
                         FontWeight="Bold"
                         Foreground="#4A90E2"
-                        Margin="0,0,0,40"
+                        Margin="0,0,0,56"
                         HorizontalAlignment="Center"/>
                 <!-- Menüelemek dinamikusan -->
             </StackPanel>
         </Border>
         <!-- Main Content -->
-        <Grid Grid.Column="1">
-            <Viewbox Stretch="Uniform"
-                    MaxWidth="600"
+        <Grid Grid.Column="1" Margin="20,0,20,0">
+            <Border Style="{StaticResource CardStyle}"
+                    MinWidth="700"
+                    MaxWidth="1400"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center">
-                <Border Style="{StaticResource CardStyle}"
-                        MinWidth="320"
-                        MaxWidth="600">
-                    <StackPanel Margin="0,0,0,0">
-                        <TextBlock Text="Üdvözlünk a Dashboardon!"
-                                Style="{StaticResource WelcomeText}"
-                                HorizontalAlignment="Center"
-                                TextWrapping="Wrap"
-                                Margin="0,0,0,18"/>
-                        <TextBlock x:Name="EmailTextBlock"
-                                Text="email@example.com"
-                                Style="{StaticResource EmailText}"
-                                HorizontalAlignment="Center"
-                                TextWrapping="Wrap"
-                                Margin="0,0,0,10"/>
-                        <TextBlock x:Name="RoleTextBlock"
-                                Text=""
-                                Style="{StaticResource EmailText}"
-                                HorizontalAlignment="Center"
-                                TextWrapping="Wrap"
-                                Margin="0,0,0,18"/>
-                        <!-- További gombok, ha szükséges -->
-                        <TextBlock Text="Nagyon örülünk, hogy csatlakoztál a PC Konfigurátorhoz! 🎉"
-                                FontSize="16"
-                                Foreground="White"
-                                TextAlignment="Center"
-                                Margin="0,0,0,16"
-                                TextWrapping="Wrap"/>
-                        <TextBlock Text="Itt fogod tudni kezelni a konfigurációidat, fiókodat és még sok mást!"
-                                FontSize="14"
-                                Foreground="#B0BEC5"
-                                TextAlignment="Center"
-                                TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
-            </Viewbox>
+                <ContentControl x:Name="MainContentArea" />
+            </Border>
         </Grid>
     </Grid>
 </Window>

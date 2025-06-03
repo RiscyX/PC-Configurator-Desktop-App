@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="PC_Configurator.Views.Forms.RAM"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PC_Configurator.Views.Forms"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Background="#23272F">
+        <Border Background="#232A36" CornerRadius="20" Padding="48" Width="540" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="RAM hozzáadása" Foreground="#F5F6FA" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,32"/>
+                <TextBlock Text="Név" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
+                <TextBox x:Name="NameTextBox" FontSize="22" Margin="0,0,0,16" Height="44"/>
+                <TextBlock Text="Kapacitás (GB)" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
+                <TextBox x:Name="CapacityGBTextBox" FontSize="22" Margin="0,0,0,16" Height="44"/>
+                <TextBlock Text="Órajel (MHz)" Foreground="#50E3C2" FontSize="20" FontWeight="SemiBold"/>
+                <TextBox x:Name="SpeedMHzTextBox" FontSize="22" Margin="0,0,0,32" Height="44"/>
+                <Button Content="Mentés" Height="54" FontSize="22" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

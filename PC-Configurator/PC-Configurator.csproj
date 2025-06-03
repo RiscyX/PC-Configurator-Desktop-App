@@ -56,8 +56,44 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Views\App\AddComponents.xaml.cs">
+      <DependentUpon>AddComponents.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\AdminSettings.xaml.cs">
+      <DependentUpon>AdminSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\ConfigBuilder.xaml.cs">
+      <DependentUpon>ConfigBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\Configs.xaml.cs">
+      <DependentUpon>Configs.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\App\Dashboard.xaml.cs">
       <DependentUpon>Dashboard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\Profile.xaml.cs">
+      <DependentUpon>Profile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\Case.xaml.cs">
+      <DependentUpon>Case.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\CPU.xaml.cs">
+      <DependentUpon>CPU.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\GPU.xaml.cs">
+      <DependentUpon>GPU.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\Motherboard.xaml.cs">
+      <DependentUpon>Motherboard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\PSU.xaml.cs">
+      <DependentUpon>PSU.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\RAM.xaml.cs">
+      <DependentUpon>RAM.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Forms\Storage.xaml.cs">
+      <DependentUpon>Storage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\User\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
@@ -77,7 +113,55 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\App\AddComponents.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\App\AdminSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\App\ConfigBuilder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\App\Configs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\App\Dashboard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\App\Profile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\Case.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\CPU.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\GPU.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\Motherboard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\PSU.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\RAM.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Forms\Storage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
