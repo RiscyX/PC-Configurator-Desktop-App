@@ -6,24 +6,94 @@
         xmlns:local="clr-namespace:PC_Configurator.Views.App"
         mc:Ignorable="d"
         d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="#23272F" Margin="20,0,20,0">
+    
+    <UserControl.Resources>
+        <!-- Modern gomb stílus a komponens kiválasztó gombokhoz -->
+        <Style x:Key="ComponentSelectButton" TargetType="Button">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8" Padding="16">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="1" Opacity="0.2" BlurRadius="5" />
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="IconBlock" 
+                                         Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
+                                         FontFamily="Segoe MDL2 Assets"
+                                         FontSize="22"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,12,0"/>
+                                <ContentPresenter Grid.Column="1" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Left"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#252525"/>
+                                <Setter Property="BorderBrush" Value="#0D66D0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#333333"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>      <Grid Background="#121212" Margin="0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360"/>
+            <ColumnDefinition Width="340"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Width="320" Margin="0,0,32,0">
-            <TextBlock Text="Alkatrészek hozzáadása" Foreground="#F5F6FA" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,40"/>
-            <Button x:Name="AddCpuButton" Content="CPU hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddCpuButton_Click"/>
-            <Button x:Name="AddGpuButton" Content="GPU hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddGpuButton_Click"/>
-            <Button x:Name="AddMotherboardButton" Content="Alaplap hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddMotherboardButton_Click"/>
-            <Button x:Name="AddRamButton" Content="RAM hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddRamButton_Click"/>
-            <Button x:Name="AddStorageButton" Content="Meghajtó hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddStorageButton_Click"/>
-            <Button x:Name="AddPsuButton" Content="Tápegység hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddPsuButton_Click"/>
-            <Button x:Name="AddCaseButton" Content="Gépház hozzáadása" Height="60" FontSize="22" Padding="0,8,0,8" Background="#4A90E2" Foreground="#F5F6FA" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,16" Click="AddCaseButton_Click"/>
-        </StackPanel>
-        <Grid Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Border MinWidth="900" MaxWidth="1100" Background="Transparent" Margin="0,0,64,0">
-                <ContentControl x:Name="FormHost" Margin="0,0,120,0"/>
+          <!-- Bal oldali komponens választó panel -->
+        <Border x:Name="LeftPanel" Grid.Column="0" Background="#1A1A1A" CornerRadius="12" Margin="20,20,10,20" BorderBrush="#333333" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect ShadowDepth="2" Opacity="0.2" BlurRadius="10"/>
+            </Border.Effect>
+            <StackPanel Margin="15" VerticalAlignment="Center">
+                <TextBlock Text="Alkatrészek hozzáadása" Foreground="White" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+                
+                <Button x:Name="AddCpuButton" Content="CPU hozzáadása" Tag="&#xE950;" Style="{StaticResource ComponentSelectButton}" Click="AddCpuButton_Click"/>
+                <Button x:Name="AddGpuButton" Content="GPU hozzáadása" Tag="&#xEC4F;" Style="{StaticResource ComponentSelectButton}" Click="AddGpuButton_Click"/>
+                <Button x:Name="AddMotherboardButton" Content="Alaplap hozzáadása" Tag="&#xE7F8;" Style="{StaticResource ComponentSelectButton}" Click="AddMotherboardButton_Click"/>
+                <Button x:Name="AddRamButton" Content="RAM hozzáadása" Tag="&#xE7F4;" Style="{StaticResource ComponentSelectButton}" Click="AddRamButton_Click"/>
+                <Button x:Name="AddStorageButton" Content="Meghajtó hozzáadása" Tag="&#xE7C3;" Style="{StaticResource ComponentSelectButton}" Click="AddStorageButton_Click"/>
+                <Button x:Name="AddPsuButton" Content="Tápegység hozzáadása" Tag="&#xE945;" Style="{StaticResource ComponentSelectButton}" Click="AddPsuButton_Click"/>
+                <Button x:Name="AddCaseButton" Content="Gépház hozzáadása" Tag="&#xE7BE;" Style="{StaticResource ComponentSelectButton}" Click="AddCaseButton_Click"/>
+            </StackPanel>
+        </Border>          <!-- Jobb oldali űrlap konténer - szélesebb és középre igazított, és magassága nem lehet nagyobb a bal panel magasságánál -->
+        <Grid Grid.Column="1" Margin="10,20,20,20">
+            <Border Background="Transparent" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center"
+                    Width="Auto"
+                    MinWidth="800"
+                    MaxHeight="{Binding ActualHeight, ElementName=LeftPanel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Auto">
+                    <ContentControl x:Name="FormHost" 
+                                    HorizontalAlignment="Center" 
+                                    VerticalAlignment="Top"
+                                    Width="Auto"/>
+                </ScrollViewer>
             </Border>
         </Grid>
     </Grid>

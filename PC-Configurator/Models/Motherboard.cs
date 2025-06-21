@@ -26,7 +26,20 @@ namespace PC_Configurator.Models
 
         public void SaveToDatabase()
         {
-            // TODO: Implement DB save logic
+            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+            using (var connection = new System.Data.SqlClient.SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new System.Data.SqlClient.SqlCommand(
+                    "INSERT INTO Motherboards (Name, Manufacturer, Chipset, Socket) VALUES (@Name, @Manufacturer, @Chipset, @Socket)", connection))
+                {
+                    command.Parameters.AddWithValue("@Name", Name);
+                    command.Parameters.AddWithValue("@Manufacturer", Manufacturer);
+                    command.Parameters.AddWithValue("@Chipset", Chipset);
+                    command.Parameters.AddWithValue("@Socket", Socket);
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

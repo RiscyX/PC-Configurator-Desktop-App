@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace PC_Configurator.Views
+namespace PC_Configurator.Views.User
 {
     public partial class LoginWindow : Window
     {
@@ -17,34 +17,61 @@ namespace PC_Configurator.Views
         {
             InitializeComponent();
             _connStr = ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+            
+            // Beállítjuk az ablak kezdeti fókuszát
+            Loaded += (s, e) => EmailTextBox.Focus();
         }
-
-        private void ShowPasswordCheckBox_Checked(object sender, RoutedEventArgs e)
+        
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Optionally implement password reveal logic here
+            // Lehetővé teszi az ablak mozgatását
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+        
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+        
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }        private void ShowPasswordCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            // Jelszó megjelenítése
+            PasswordVisibleBox.Text = PasswordBox.Password;
+            PasswordBox.Visibility = Visibility.Collapsed;
+            PasswordVisibleBox.Visibility = Visibility.Visible;
+            PasswordVisibleBox.Focus();
+            PasswordVisibleBox.SelectionStart = PasswordVisibleBox.Text.Length;
+            
+            // Debug üzenet a beírt szöveg ellenőrzéséhez
+            Console.WriteLine($"Jelszó: {PasswordVisibleBox.Text}");
         }
 
         private void ShowPasswordCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            // Optionally implement password hide logic here
-        }
-
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+            // Jelszó elrejtése
+            PasswordBox.Password = PasswordVisibleBox.Text;
+            PasswordVisibleBox.Visibility = Visibility.Collapsed;
+            PasswordBox.Visibility = Visibility.Visible;
+            PasswordBox.Focus();
+        }private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string email = EmailTextBox.Text.Trim();
-            string password = PasswordBox.Password;
+            string password = ShowPasswordCheckBox.IsChecked == true ? PasswordVisibleBox.Text : PasswordBox.Password;
 
             if (!ValidateInput(email, password))
                 return;
 
-            string passwordHash = HashPassword(password);
-            if (CheckCredentials(email, passwordHash))
+            string passwordHash = HashPassword(password);            if (CheckCredentials(email, passwordHash))
             {
                 string role = GetUserRole(email);
                 var dashboard = new App.Dashboard(email, role);
-                dashboard.Owner = this.Owner;
-                dashboard.Show();
+                dashboard.WindowState = WindowState.Maximized;
                 this.Close();
+                dashboard.ShowDialog();
             }
             else
             {

@@ -4,8 +4,9 @@ using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 
-namespace PC_Configurator.Views
+namespace PC_Configurator.Views.User
 {
     public partial class RegistrationWindow : Window
     {
@@ -15,18 +16,41 @@ namespace PC_Configurator.Views
         {
             InitializeComponent();
             _connStr = ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+            
+            // Beállítjuk az ablak kezdeti fókuszát
+            Loaded += (s, e) => EmailTextBox.Focus();
         }
-
-        // Reveal password by swapping visibility between PasswordBox and overlay TextBox
+        
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Lehetővé teszi az ablak mozgatását
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+        
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+        
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }        // Reveal password by swapping visibility between PasswordBox and overlay TextBox
         private void ShowPasswordCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             PasswordTextBox.Text = PasswordBox.Password;
             PasswordTextBox.Visibility = Visibility.Visible;
             PasswordBox.Visibility = Visibility.Collapsed;
+            PasswordTextBox.Focus();
+            PasswordTextBox.SelectionStart = PasswordTextBox.Text.Length;
 
             ConfirmPasswordTextBox.Text = ConfirmPasswordBox.Password;
             ConfirmPasswordTextBox.Visibility = Visibility.Visible;
             ConfirmPasswordBox.Visibility = Visibility.Collapsed;
+            
+            // Debug üzenet a beírt szöveg ellenőrzéséhez
+            Console.WriteLine($"Jelszó: {PasswordTextBox.Text}, Megerősítés: {ConfirmPasswordTextBox.Text}");
         }
 
         private void ShowPasswordCheckBox_Unchecked(object sender, RoutedEventArgs e)

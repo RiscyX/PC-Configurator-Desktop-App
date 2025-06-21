@@ -5,14 +5,192 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PC_Configurator.Views.App"
         mc:Ignorable="d"
-        d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="400" Margin="0" >
-            <TextBlock Text="Fiókom" Foreground="#F5F6FA" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,18"/>
-            <TextBlock Text="Email cím:" Foreground="#50E3C2" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <TextBlock x:Name="EmailTextBlock" Text="" Foreground="#F5F6FA" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
-            <TextBlock Text="Szerepkör:" Foreground="#4A90E2" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <TextBlock x:Name="RoleTextBlock" Text="" Foreground="#F5F6FA" FontSize="20" FontWeight="Bold"/>
-        </StackPanel>
-    </Grid>
+        d:DesignHeight="700" d:DesignWidth="900">
+    
+    <UserControl.Resources>
+        <Style x:Key="ProfileHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+        
+        <Style x:Key="ProfileSection" TargetType="Border">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,24"/>
+        </Style>
+        
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+        
+        <Style x:Key="LabelText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        
+        <Style x:Key="ValueText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+        
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#0D66D0"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="20,8,20,8"/>
+            <Setter Property="Margin" Value="0,10,10,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0D47A1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#333333"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#444444"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Profile Header -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Profile Avatar -->
+                <Border Grid.Column="0" Width="96" Height="96" Background="#0D66D0" CornerRadius="48" Margin="0,0,20,0">
+                    <TextBlock x:Name="UserInitials" Text="JD" FontSize="36" FontWeight="Bold" Foreground="White" 
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                
+                <!-- User Info -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Felhasználói fiók" Style="{StaticResource ProfileHeader}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Felhasználónév: " Foreground="#AAAAAA" FontSize="16"/>
+                        <TextBlock x:Name="UsernameBlock" Text="johndoe" Foreground="#FFFFFF" FontSize="16" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Profile Content -->
+            <StackPanel Grid.Row="1" Margin="0,30,0,0">
+                <!-- Personal Information Section -->
+                <Border Style="{StaticResource ProfileSection}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Text="Személyes adatok" Style="{StaticResource SectionTitle}"/>
+                        
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Email -->
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Email cím" Style="{StaticResource LabelText}"/>
+                                <TextBlock x:Name="EmailTextBlock" Text="email@example.com" Style="{StaticResource ValueText}"/>
+                            </StackPanel>
+                            
+                            <!-- Role -->
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Jogosultsági szint" Style="{StaticResource LabelText}"/>
+                                <TextBlock x:Name="RoleTextBlock" Text="Felhasználó" Style="{StaticResource ValueText}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+                
+                <!-- Account Settings Section -->
+                <Border Style="{StaticResource ProfileSection}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Text="Fiók beállítások" Style="{StaticResource SectionTitle}"/>
+                        
+                        <StackPanel Grid.Row="1">
+                            <TextBlock Text="Jelszó" Style="{StaticResource LabelText}"/>
+                            <TextBlock Text="••••••••••" Style="{StaticResource ValueText}"/>
+                            
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="ChangePasswordButton" Content="Jelszó módosítása" Style="{StaticResource ActionButton}" Click="ChangePasswordButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Activity Section -->
+                <Border Style="{StaticResource ProfileSection}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Text="Aktivitás" Style="{StaticResource SectionTitle}"/>
+                        
+                        <StackPanel Grid.Row="1">
+                            <TextBlock Text="Utolsó belépés" Style="{StaticResource LabelText}"/>
+                            <TextBlock x:Name="LastLoginTextBlock" Text="2025. június 21. 14:30" Style="{StaticResource ValueText}"/>
+                            
+                            <TextBlock Text="Mentett konfigurációk" Style="{StaticResource LabelText}"/>
+                            <TextBlock x:Name="SavedConfigsTextBlock" Text="3 konfiguráció" Style="{StaticResource ValueText}" Margin="0,0,0,10"/>
+                            
+                            <Button x:Name="ViewConfigsButton" Content="Konfigurációk megtekintése" Style="{StaticResource SecondaryButton}" Click="ViewConfigsButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

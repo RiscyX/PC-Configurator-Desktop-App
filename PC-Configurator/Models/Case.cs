@@ -22,7 +22,18 @@ namespace PC_Configurator.Models
 
         public void SaveToDatabase()
         {
-            // TODO: Implement DB save logic
+            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+            using (var connection = new System.Data.SqlClient.SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new System.Data.SqlClient.SqlCommand(
+                    "INSERT INTO Cases (Name, FormFactor) VALUES (@Name, @FormFactor)", connection))
+                {
+                    command.Parameters.AddWithValue("@Name", Name);
+                    command.Parameters.AddWithValue("@FormFactor", FormFactor);
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

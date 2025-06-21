@@ -63,11 +63,15 @@
     <Compile Include="Models\PSU.cs" />
     <Compile Include="Models\RAM.cs" />
     <Compile Include="Models\Storage.cs" />
+    <Compile Include="Models\Users.cs" />
     <Compile Include="Views\App\AddComponents.xaml.cs">
       <DependentUpon>AddComponents.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\App\AdminSettings.xaml.cs">
       <DependentUpon>AdminSettings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\Components.xaml.cs">
+      <DependentUpon>Components.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\App\ConfigBuilder.xaml.cs">
       <DependentUpon>ConfigBuilder.xaml</DependentUpon>
@@ -80,6 +84,9 @@
     </Compile>
     <Compile Include="Views\App\Profile.xaml.cs">
       <DependentUpon>Profile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\Users.xaml.cs">
+      <DependentUpon>Users.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Forms\Case.xaml.cs">
       <DependentUpon>Case.xaml</DependentUpon>
@@ -128,6 +135,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\App\Components.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\App\ConfigBuilder.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -141,6 +152,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\App\Profile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\App\Users.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

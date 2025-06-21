@@ -5,8 +5,422 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PC_Configurator.Views.App"
         mc:Ignorable="d"
-        d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="Admin beállítások (AdminSettings)" Foreground="#F5F6FA" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    </Grid>
+        d:DesignHeight="700" d:DesignWidth="1000">
+    
+    <UserControl.Resources>
+        <!-- Stílusok az elemekhez -->
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+        
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+        
+        <Style x:Key="SettingLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="SwitchButton" TargetType="ToggleButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border x:Name="BackBorder" Width="44" Height="24" Background="#666666" CornerRadius="12"/>
+                            <Border x:Name="ThumbBorder" Width="20" Height="20" Background="White" CornerRadius="10" 
+                                   HorizontalAlignment="Left" Margin="2,0,0,0"/>
+                            <ContentPresenter x:Name="Content" Visibility="Collapsed"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BackBorder" Property="Background" Value="#0D66D0"/>
+                                <Setter TargetName="ThumbBorder" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="ThumbBorder" Property="Margin" Value="0,0,2,0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#0D66D0"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="16,8,16,8"/>
+            <Setter Property="Margin" Value="0,8,0,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0D47A1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#D32F2F"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F44336"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#B71C1C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="NeutralButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#555555"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#666666"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#444444"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="StyledComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="8,5,5,5"/>
+        </Style>
+        
+        <Style x:Key="StyledTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="8,0"/>
+        </Style>
+        
+        <Style x:Key="InfoText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#999999"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,4,0,12"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Oldal címe -->
+            <TextBlock Text="Admin beállítások" FontSize="24" FontWeight="Bold" Foreground="White" 
+                     Margin="0,0,0,24" Grid.Row="0"/>
+            
+            <!-- Rendszerbeállítások szakasz -->
+            <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="Rendszerbeállítások" Style="{StaticResource SectionTitle}" Grid.Row="0"/>
+                    
+                    <!-- Adatbázis beállítások -->
+                    <Grid Grid.Row="1" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <StackPanel Grid.Column="0" Grid.Row="0">
+                            <TextBlock Text="Adatbázis kapcsolat" Style="{StaticResource SettingLabel}"/>
+                            <TextBlock Text="Az alkalmazás által használt adatbázis kapcsolati beállításai" Style="{StaticResource InfoText}"/>
+                        </StackPanel>
+                        
+                        <Button Content="Kapcsolat tesztelése" Style="{StaticResource ActionButton}" 
+                               Grid.Column="1" Grid.Row="0" VerticalAlignment="Top" Click="TestDbConnection_Click"/>
+                        
+                        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Text="Szerver" Grid.Row="0" Grid.Column="0" Margin="0,0,12,8"/>
+                            <TextBox x:Name="DbServerTextBox" Text="localhost" Grid.Row="1" Grid.Column="0" 
+                                    Style="{StaticResource StyledTextBox}" Margin="0,0,12,12"/>
+                            
+                            <TextBlock Text="Adatbázis neve" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"/>
+                            <TextBox x:Name="DbNameTextBox" Text="pc_configurator" Grid.Row="1" Grid.Column="1" 
+                                    Style="{StaticResource StyledTextBox}" Margin="0,0,0,12"/>
+                            
+                            <TextBlock Text="Felhasználónév" Grid.Row="2" Grid.Column="0" Margin="0,0,12,8"/>
+                            <TextBox x:Name="DbUserTextBox" Text="root" Grid.Row="3" Grid.Column="0" 
+                                    Style="{StaticResource StyledTextBox}" Margin="0,0,12,0"/>
+                            
+                            <TextBlock Text="Jelszó" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"/>
+                            <PasswordBox x:Name="DbPasswordBox" Grid.Row="3" Grid.Column="1" 
+                                        Background="#1E1E1E" Foreground="White" BorderBrush="#333333" 
+                                        BorderThickness="1" Height="36" VerticalContentAlignment="Center" Padding="8,0"/>
+                        </Grid>
+                    </Grid>
+                    
+                    <Separator Grid.Row="2" Background="#333333" Margin="0,0,0,16"/>
+                      <!-- Egyéb rendszerbeállítások -->
+                    <StackPanel Grid.Row="3" Orientation="Vertical">
+                        <!-- Rendszer karbantartás mód -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Karbantartási mód" Style="{StaticResource SettingLabel}"/>
+                                <TextBlock Text="Ha be van kapcsolva, csak admin felhasználók jelentkezhetnek be" Style="{StaticResource InfoText}"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="MaintenanceModeToggle" Grid.Column="1" Style="{StaticResource SwitchButton}" 
+                                         VerticalAlignment="Top" Checked="MaintenanceModeToggle_Checked" Unchecked="MaintenanceModeToggle_Unchecked"/>
+                        </Grid>
+                          <!-- Összetevő automatikus jóváhagyás -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Komponens automatikus jóváhagyás" Style="{StaticResource SettingLabel}"/>
+                                <TextBlock Text="Az új komponensek automatikusan jóváhagyásra kerülnek" Style="{StaticResource InfoText}"/>
+                            </StackPanel>
+                            <ToggleButton x:Name="AutoApproveToggle" Grid.Column="1" Style="{StaticResource SwitchButton}" 
+                                         VerticalAlignment="Top" IsChecked="True"/>
+                        </Grid>
+                        
+                        <!-- Regisztrációs mód -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Column="0" Grid.Row="0">
+                                <TextBlock Text="Regisztrációs mód" Style="{StaticResource SettingLabel}"/>
+                                <TextBlock Text="Válaszd ki, hogyan történjenek az új felhasználói regisztrációk" Style="{StaticResource InfoText}"/>
+                            </StackPanel>
+                            
+                            <ComboBox x:Name="RegistrationModeCombo" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Style="{StaticResource StyledComboBox}" SelectionChanged="RegistrationModeCombo_SelectionChanged">
+                                <ComboBoxItem Content="Nyílt regisztráció (bárki regisztrálhat)"/>
+                                <ComboBoxItem Content="Moderált regisztráció (admin jóváhagyással)" IsSelected="True"/>
+                                <ComboBoxItem Content="Zárt rendszer (nincs új regisztráció)"/>
+                            </ComboBox>
+                        </Grid>
+                        
+                        <!-- Adatbázis mentési beállítások -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Column="0" Grid.Row="0">
+                                <TextBlock Text="Adatbázis biztonsági mentés" Style="{StaticResource SettingLabel}"/>
+                                <TextBlock Text="Automatikus adatbázis mentés ütemezése" Style="{StaticResource InfoText}"/>
+                            </StackPanel>
+                            
+                            <ComboBox x:Name="BackupFrequencyCombo" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Style="{StaticResource StyledComboBox}">
+                                <ComboBoxItem Content="Naponta"/>
+                                <ComboBoxItem Content="Hetente" IsSelected="True"/>
+                                <ComboBoxItem Content="Havonta"/>
+                                <ComboBoxItem Content="Kézi mentés"/>
+                            </ComboBox>
+                            
+                            <Button Content="Adatbázis mentése most" Style="{StaticResource ActionButton}" 
+                                   Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" HorizontalAlignment="Left"
+                                   Margin="0,12,0,0" Click="BackupNow_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Admin felhasználók kezelése -->
+            <Border Grid.Row="2" Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="Admin felhasználók kezelése" Style="{StaticResource SectionTitle}" Grid.Row="0"/>
+                    
+                    <Grid Grid.Row="1" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Text="Az alkalmazásban jelenleg 2 admin felhasználó van" VerticalAlignment="Center" Grid.Column="0" Foreground="#CCCCCC"/>
+                        <Button Content="Admin hozzáadása" Style="{StaticResource ActionButton}" Grid.Column="1" Click="AddAdmin_Click"/>
+                    </Grid>
+                    
+                    <!-- Admin lista -->
+                    <Border Grid.Row="2" Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="4">
+                        <ListView x:Name="AdminList" Background="Transparent" BorderThickness="0">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Padding" Value="8"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Admin avatar/ikon -->
+                                            <Border Width="40" Height="40" Background="#444444" CornerRadius="20" Margin="0,0,16,0">
+                                                <TextBlock Text="{Binding Initials}" Foreground="White" FontSize="16" FontWeight="SemiBold"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            
+                                            <!-- Admin adatok -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="14" FontWeight="Medium" Foreground="White"/>
+                                                <TextBlock Text="{Binding Email}" FontSize="12" Foreground="#999999" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                            
+                                            <!-- Gombok -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="Jogosultságok" Style="{StaticResource NeutralButton}" Margin="0,0,8,0" 
+                                                       Tag="{Binding Id}" Click="AdminPermissions_Click"/>
+                                                <Button Content="Eltávolítás" Style="{StaticResource DangerButton}" 
+                                                       Tag="{Binding Id}" Click="RemoveAdmin_Click"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>                            <!-- Az adatok a code-behind fájlból töltődnek be az ItemsSource tulajdonságon keresztül -->
+                            
+                        </ListView>
+                    </Border>
+                </Grid>
+            </Border>
+            
+            <!-- Veszélyes műveletek -->
+            <Border Grid.Row="3" Style="{StaticResource CardBorder}" Background="#252020">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="Veszélyes műveletek" Style="{StaticResource SectionTitle}" Grid.Row="0" Foreground="#F44336"/>
+                      <StackPanel Grid.Row="1" Orientation="Vertical">
+                        <!-- Adatbázis újraépítése -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Adatbázis újraépítése" Style="{StaticResource SettingLabel}" Foreground="#FF9E80"/>
+                                <TextBlock Text="Az adatbázis séma újraépítése. Minden adat elvész! Csak karbantartási célokra." 
+                                         Style="{StaticResource InfoText}" Foreground="#FF9E80"/>
+                            </StackPanel>
+                            <Button Content="Adatbázis újraépítése" Style="{StaticResource DangerButton}" Grid.Column="1" VerticalAlignment="Top"
+                                   Click="RebuildDatabase_Click"/>
+                        </Grid>
+                          <!-- Minden komponens törlése -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Minden komponens törlése" Style="{StaticResource SettingLabel}" Foreground="#FF9E80"/>
+                                <TextBlock Text="Az összes komponens adatbázisból történő törlése. Ez a művelet nem visszavonható!" 
+                                         Style="{StaticResource InfoText}" Foreground="#FF9E80"/>
+                            </StackPanel>
+                            <Button Content="Komponensek törlése" Style="{StaticResource DangerButton}" Grid.Column="1" VerticalAlignment="Top"
+                                   Click="DeleteAllComponents_Click"/>
+                        </Grid>
+                        
+                        <!-- Minden konfiguráció törlése -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Minden konfiguráció törlése" Style="{StaticResource SettingLabel}" Foreground="#FF9E80"/>
+                                <TextBlock Text="Az összes felhasználói konfiguráció törlése. Ez a művelet nem visszavonható!" 
+                                         Style="{StaticResource InfoText}" Foreground="#FF9E80"/>
+                            </StackPanel>
+                            <Button Content="Konfigurációk törlése" Style="{StaticResource DangerButton}" Grid.Column="1" VerticalAlignment="Top"
+                                   Click="DeleteAllConfigs_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

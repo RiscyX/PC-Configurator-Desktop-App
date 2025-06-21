@@ -5,8 +5,376 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PC_Configurator.Views.App"
         mc:Ignorable="d"
-        d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="Gépépítés (ConfigBuilder)" Foreground="#F5F6FA" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        d:DesignHeight="700" d:DesignWidth="1000">
+    
+    <UserControl.Resources>
+        <!-- Component Card Style -->
+        <Style x:Key="ComponentCard" TargetType="Border">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="MinHeight" Value="70"/>
+        </Style>
+        
+        <!-- Component Card Selected Style -->
+        <Style x:Key="ComponentCardSelected" TargetType="Border">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="BorderBrush" Value="#0D66D0"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="MinHeight" Value="70"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" BlurRadius="10" Color="#0D66D0" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Component Type Header Style -->
+        <Style x:Key="ComponentTypeHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#0D66D0"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="20,8,20,8"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#0D47A1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- Secondary Button Style -->
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#333333"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#444444"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Config Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Új konfiguráció összeállítása" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
+                <TextBlock Text="Válaszd ki a szükséges komponenseket és állítsd össze álmaid számítógépét" 
+                         Foreground="#AAAAAA" FontSize="14" TextWrapping="Wrap"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <TextBlock Text="Teljes ár:" FontSize="16" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="TotalPriceBlock" Text="0 Ft" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Left Column: Component Selection -->
+                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                    <!-- CPU Selection -->
+                    <TextBlock Text="Processzor (CPU)" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="CpuCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="CPU">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="CpuNameBlock" Text="Válassz processzort" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="CpuDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Motherboard Selection -->
+                    <TextBlock Text="Alaplap" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="MotherboardCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="Motherboard">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE952;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="MotherboardNameBlock" Text="Válassz alaplapot" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="MotherboardDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- GPU Selection -->
+                    <TextBlock Text="Videókártya (GPU)" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="GpuCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="GPU">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE964;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="GpuNameBlock" Text="Válassz videókártyát" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="GpuDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- RAM Selection -->
+                    <TextBlock Text="Memória (RAM)" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="RamCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="RAM">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="RamNameBlock" Text="Válassz memóriát" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="RamDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Storage Selection -->
+                    <TextBlock Text="Tárhely" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="StorageCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="Storage">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE96E;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="StorageNameBlock" Text="Válassz tárhelyet" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="StorageDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- PSU Selection -->
+                    <TextBlock Text="Tápegység" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="PsuCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="PSU">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="PsuNameBlock" Text="Válassz tápegységet" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="PsuDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Case Selection -->
+                    <TextBlock Text="Számítógépház" Style="{StaticResource ComponentTypeHeader}"/>
+                    <Border x:Name="CaseCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="Case">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
+                                <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="CaseNameBlock" Text="Válassz számítógépházat" FontSize="16" Foreground="White"/>
+                                <TextBlock x:Name="CaseDetailsBlock" Text="Nincs kiválasztva" FontSize="12" Foreground="#AAAAAA" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" Text="&#xE972;" FontFamily="Segoe MDL2 Assets" FontSize="14" Foreground="#AAAAAA" 
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+                
+                <!-- Right Column: Summary and Compatibility -->
+                <StackPanel Grid.Column="1">
+                    <!-- Configuration Summary -->
+                    <Border Background="#252525" BorderBrush="#333333" BorderThickness="1" CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="Konfiguráció összefoglaló" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,16"/>
+                            
+                            <!-- Compatibility Check -->
+                            <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <TextBlock Grid.Column="0" Text="&#xE930;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#0D66D0" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Column="1" Text="Kompatibilitás ellenőrzés" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                                    </Grid>
+                                    
+                                    <TextBlock x:Name="CompatibilityMessage" Text="Válassz komponenseket a kompatibilitás ellenőrzéséhez" 
+                                             Foreground="#AAAAAA" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Performance Rating -->
+                            <TextBlock Text="Teljesítmény értékelés" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <ProgressBar Grid.Column="0" Value="0" Maximum="100" Height="8" Background="#333333" Foreground="#0D66D0"/>
+                                <TextBlock Grid.Column="1" x:Name="PerformanceRating" Text="N/A" Foreground="White" FontSize="14" FontWeight="Bold" Margin="8,0,0,0"/>
+                            </Grid>
+                            
+                            <!-- Recommended Use Cases -->
+                            <TextBlock Text="Ajánlott felhasználás" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="RecommendedUseBlock" Text="Általános felhasználás" Foreground="#AAAAAA" FontSize="14" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Estimated Power Consumption -->
+                    <Border Background="#252525" BorderBrush="#333333" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,16,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Becsült teljesítményigény" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12"/>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#0D66D0"/>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock x:Name="PowerConsumptionBlock" Text="0 W" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock Text="becsült használat" FontSize="12" Foreground="#AAAAAA"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+        
+        <!-- Bottom Buttons -->
+        <Grid Grid.Row="2" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="0" Content="Komponenslista törlése" Style="{StaticResource SecondaryButton}" 
+                   HorizontalAlignment="Left" Click="ClearConfig_Click"/>
+            
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Konfiguráció mentése" Style="{StaticResource ActionButton}" Click="SaveConfig_Click"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

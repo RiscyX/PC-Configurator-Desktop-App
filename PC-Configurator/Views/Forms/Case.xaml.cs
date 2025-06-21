@@ -23,6 +23,30 @@ namespace PC_Configurator.Views.Forms
         public Case()
         {
             InitializeComponent();
+            SaveButton.Click += SaveButton_Click;
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            string name = NameTextBox.Text?.Trim();
+            string formFactor = (FormFactorComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(formFactor))
+            {
+                MessageBox.Show("Minden mező kitöltése kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            var model = new PC_Configurator.Models.Case { Name = name, FormFactor = formFactor };
+            try
+            {
+                model.SaveToDatabase();
+                MessageBox.Show("Gépház sikeresen mentve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                NameTextBox.Text = string.Empty;
+                FormFactorComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba mentés közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

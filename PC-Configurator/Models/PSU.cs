@@ -24,7 +24,19 @@ namespace PC_Configurator.Models
 
         public void SaveToDatabase()
         {
-            // TODO: Implement DB save logic
+            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+            using (var connection = new System.Data.SqlClient.SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new System.Data.SqlClient.SqlCommand(
+                    "INSERT INTO PSUs (Name, Wattage, EfficiencyRating) VALUES (@Name, @Wattage, @EfficiencyRating)", connection))
+                {
+                    command.Parameters.AddWithValue("@Name", Name);
+                    command.Parameters.AddWithValue("@Wattage", Wattage);
+                    command.Parameters.AddWithValue("@EfficiencyRating", EfficiencyRating);
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

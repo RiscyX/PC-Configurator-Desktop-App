@@ -5,42 +5,175 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PC_Configurator"
         mc:Ignorable="d"
-        Title="Számítógép Konfigurátor" Height="450" Width="600"
-        Background="#1E1E1E" Foreground="White"
-        WindowStartupLocation="CenterScreen">
+        Title="PC Konfigurátor" 
+        Height="700" 
+        Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#121212"
+        Foreground="White"
+        WindowStyle="None"
+        ResizeMode="CanMinimize"
+        AllowsTransparency="True">
+    
+    <Window.Resources>
+        <Style x:Key="ModernCardButton" TargetType="Button">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PART_Border" Background="{TemplateBinding Background}" 
+                                CornerRadius="12" Padding="{TemplateBinding Padding}"
+                                BorderBrush="#333333" BorderThickness="1">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="3" Opacity="0.3" BlurRadius="10" />
+                            </Border.Effect>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Border x:Name="PART_IconBorder" Grid.Row="0" 
+                                        Width="80" Height="80" 
+                                        Background="#0D66D0" 
+                                        CornerRadius="40" 
+                                        HorizontalAlignment="Center" 
+                                        Margin="0,0,0,20">
+                                    <TextBlock x:Name="PART_Icon" Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
+                                              FontFamily="Segoe MDL2 Assets" 
+                                              FontSize="32" 
+                                              Foreground="White" 
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Row="1">
+                                    <TextBlock Text="{TemplateBinding Content}" 
+                                             FontSize="{TemplateBinding FontSize}" 
+                                             FontWeight="{TemplateBinding FontWeight}"
+                                             Foreground="{TemplateBinding Foreground}" 
+                                             HorizontalAlignment="Center"
+                                             TextAlignment="Center"/>
+                                    
+                                    <TextBlock x:Name="PART_Description" 
+                                             Text="{Binding CommandParameter, RelativeSource={RelativeSource TemplatedParent}}"
+                                             FontSize="14"
+                                             Foreground="#AAAAAA"
+                                             HorizontalAlignment="Center"
+                                             TextAlignment="Center"
+                                             Margin="0,10,0,0"
+                                             TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PART_Border" Property="BorderBrush" Value="#0D66D0"/>
+                                <Setter TargetName="PART_Border" Property="Background" Value="#222222"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <StackPanel Margin="30" VerticalAlignment="Center">
-            <!-- Alkalmazás címe -->
-            <TextBlock Text="Számítógép Konfigurátor"
-                       FontSize="28" FontWeight="SemiBold"
-                       HorizontalAlignment="Center" Margin="0,0,0,20"/>
-
-            <!-- Gombok rácsban elrendezve -->
-            <Grid HorizontalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Regisztráció gomb -->
-                <Button Grid.Column="0"
-                        Name="btnRegister" Content="Regisztráció"
-                        Width="200" Height="60"
-                        Click="BtnRegister_Click"
-                        Background="#4A90E2" Foreground="White"
-                        FontSize="22" FontWeight="Bold" Padding="16" BorderThickness="0"
-                        Cursor="Hand"/>
-
-                <!-- Bejelentkezés gomb -->
-                <Button Grid.Column="1"
-                        Name="btnLogin" Content="Bejelentkezés"
-                        Width="200" Height="60"
-                        Margin="16,0,0,0"
-                        Click="BtnLogin_Click"
-                        Background="#50E3C2" Foreground="White"
-                        FontSize="22" FontWeight="Bold" Padding="16" BorderThickness="0"
-                        Cursor="Hand"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Fejléc vezérlőgombokkal -->
+        <Border Grid.Row="0" Background="#1E1E1E" Height="48" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+            <Grid>
+                <TextBlock Text="PC KONFIGURÁTOR" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                           Margin="20,0,0,0" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="MinimizeButton" Width="48" Height="48" 
+                            Background="Transparent" BorderThickness="0" 
+                            Click="MinimizeButton_Click" Cursor="Hand">
+                        <TextBlock Text="&#xE949;" FontFamily="Segoe MDL2 Assets" 
+                                 FontSize="12" Foreground="#AAAAAA"/>
+                    </Button>
+                    <Button x:Name="CloseButton" Width="48" Height="48" 
+                            Background="Transparent" BorderThickness="0" 
+                            Click="CloseButton_Click" Cursor="Hand">
+                        <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" 
+                                 FontSize="12" Foreground="#AAAAAA"/>
+                    </Button>
+                </StackPanel>
             </Grid>
-        </StackPanel>
+        </Border>
+        
+        <!-- Fő tartalom -->
+        <Border Grid.Row="1" Background="#121212">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Cím és leírás -->
+                <StackPanel Grid.Row="0" Margin="0,50,0,30">
+                    <TextBlock Text="Üdvözöljük a PC Konfigurátorban" 
+                               FontSize="32" FontWeight="Bold" 
+                               HorizontalAlignment="Center"
+                               Foreground="White"/>
+                    
+                    <TextBlock Text="Konfigurálja, tervezze, építse meg álmai számítógépét" 
+                               FontSize="16" 
+                               HorizontalAlignment="Center"
+                               Foreground="#AAAAAA"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+                
+                <!-- Kártyák a bejelentkezéshez és regisztrációhoz -->
+                <Grid Grid.Row="1" Margin="0,20,0,100">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Bejelentkezés kártya -->
+                    <Button Grid.Column="1" 
+                            Name="btnLogin" 
+                            Content="Bejelentkezés" 
+                            Tag="&#xE77B;" 
+                            CommandParameter="Jelentkezzen be meglévő fiókjába, és folytassa a munkát"
+                            Style="{StaticResource ModernCardButton}" 
+                            Width="300" Height="320"
+                            Click="BtnLogin_Click"
+                            Margin="0,0,20,0"/>
+                    
+                    <!-- Regisztráció kártya -->
+                    <Button Grid.Column="2" 
+                            Name="btnRegister" 
+                            Content="Regisztráció" 
+                            Tag="&#xE8FA;" 
+                            CommandParameter="Regisztráljon új felhasználóként, és kezdje el használni az alkalmazást"
+                            Style="{StaticResource ModernCardButton}" 
+                            Width="300" Height="320"
+                            Click="BtnRegister_Click"
+                            Margin="20,0,0,0"/>
+                </Grid>
+                
+                <!-- Alsó copyright szöveg -->
+                <TextBlock Grid.Row="1" 
+                           Text="© 2025 PC Konfigurátor | Minden jog fenntartva" 
+                           FontSize="12"
+                           Foreground="#777777"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,20"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

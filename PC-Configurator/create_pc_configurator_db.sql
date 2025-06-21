@@ -47,7 +47,8 @@ CREATE TABLE RAMs (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
     CapacityGB INT,
-    SpeedMHz INT
+    SpeedMHz INT,
+    Type NVARCHAR(50)
 );
 
 -- Háttértárak (Storage) tábla
