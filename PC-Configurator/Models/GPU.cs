@@ -6,18 +6,25 @@ using System.Threading.Tasks;
 
 namespace PC_Configurator.Models
 {
-    internal class GPU
+    public class GPU
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Manufacturer { get; set; }
         public int MemoryGB { get; set; }
+        public int Memory { get { return MemoryGB; } }  // Alias for MemoryGB for compatibility
+        public string MemoryType { get; set; } = "GDDR6";  // Default value
+        public decimal Price { get; set; }
+        public int PowerConsumption { get; set; }
 
         public GPU() { }
-        public GPU(int id, string name, string manufacturer, int memoryGB)
+        public GPU(int id, string name, string manufacturer, int memoryGB, string memoryType = "GDDR6", decimal price = 0, int powerConsumption = 0)
         {
             Id = id;
             Name = name;
+            MemoryType = memoryType;
+            Price = price;
+            PowerConsumption = powerConsumption;
             Manufacturer = manufacturer;
             MemoryGB = memoryGB;
         }

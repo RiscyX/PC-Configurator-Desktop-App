@@ -106,11 +106,14 @@
                 <DropShadowEffect ShadowDepth="2" Opacity="0.2" BlurRadius="10" />
             </Border.Effect>
             <StackPanel HorizontalAlignment="Center" Width="700">
+                <TextBlock x:Name="FormTitle" Text="RAM szerkesztése" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40" Visibility="Collapsed"/>
                 <TextBlock Text="RAM hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
                 <TextBlock Text="Név" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
+                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="NameErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Kapacitás (GB)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="CapacityGBComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectedIndex="0">
+                <ComboBox x:Name="CapacityGBComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="2" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="4" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="8" Foreground="White" Background="#1E1E1E"/>
@@ -119,13 +122,26 @@
                     <ComboBoxItem Content="64" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="128" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="CapacityGBErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Órajel (MHz)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="SpeedMHzTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
+                <TextBox x:Name="SpeedMHzTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="SpeedMHzErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Típus" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="TypeComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,40" SelectedIndex="0">
+                <ComboBox x:Name="TypeComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="DDR4" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="DDR5" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="TypeErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Ár (Ft)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
+                <TextBox x:Name="PriceTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PriceErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Fogyasztás (W)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
+                <TextBox x:Name="PowerConsumptionTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PowerConsumptionErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+                
                 <Button x:Name="SaveButton" Content="Mentés" 
                         Width="240" Height="60" Margin="0,30,0,20"
                         Background="#0D66D0" Foreground="White"

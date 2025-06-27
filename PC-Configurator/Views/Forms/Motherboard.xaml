@@ -106,11 +106,13 @@
                 <DropShadowEffect ShadowDepth="2" Opacity="0.2" BlurRadius="10" />
             </Border.Effect>
             <StackPanel HorizontalAlignment="Center" Width="700">
-                <TextBlock Text="Alaplap hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
+                <TextBlock x:Name="FormTitle" Text="Alaplap hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
                 <TextBlock Text="Név" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
+                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="NameErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Gyártó" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="ManufacturerComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectionChanged="ManufacturerComboBox_SelectionChanged">
+                <ComboBox x:Name="ManufacturerComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectionChanged="ManufacturerComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="ASUS" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="ASRock" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="Gigabyte" Foreground="White" Background="#1E1E1E"/>
@@ -119,17 +121,30 @@
                     <ComboBoxItem Content="Supermicro" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="EVGA" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="ManufacturerErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Chipkészlet" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="ChipsetComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectionChanged="ChipsetComboBox_SelectionChanged"/>                
+                <ComboBox x:Name="ChipsetComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectionChanged="ChipsetComboBox_SelectionChanged"/>
+                <TextBlock x:Name="ChipsetErrorBlock" Style="{StaticResource ValidationErrorText}"/>                
                 <TextBlock Text="Formátum (Form Factor)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="FormFactorComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectedIndex="0">
+                <ComboBox x:Name="FormFactorComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="ATX" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="Micro-ATX" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="Mini-ITX" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="E-ATX" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="FormFactorErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Foglalat" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="SocketComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,40"/>
+                <ComboBox x:Name="SocketComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="SocketErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Ár (HUF)" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <TextBox x:Name="PriceTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PriceErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Fogyasztás (W)" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <TextBox x:Name="PowerConsumptionTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PowerConsumptionErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 
                 <Button x:Name="SaveButton" Content="Mentés" 
                         Width="240" Height="60" Margin="0,30,0,20"

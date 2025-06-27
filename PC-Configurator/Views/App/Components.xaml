@@ -186,8 +186,9 @@
                                     <TextBlock Text="{Binding Id, StringFormat='ID: {0}'}" FontSize="14" Foreground="#AAAAAA" Margin="0,6,0,0"/>
                                 </StackPanel>
                                 
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                    <Button Width="42" Height="42" Background="#0D66D0" BorderThickness="0" Margin="0,0,10,0">
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" x:Name="AdminButtons">
+                                    <Button Width="42" Height="42" Background="#0D66D0" BorderThickness="0" Margin="0,0,10,0" 
+                                           x:Name="EditButton" Click="EditButton_Click" Tag="{Binding Id}">
                                         <Button.Resources>
                                             <Style TargetType="Border">
                                                 <Setter Property="CornerRadius" Value="8"/>
@@ -198,7 +199,8 @@
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </Button>
                                     
-                                    <Button Width="42" Height="42" Background="#851D1D" BorderThickness="0">
+                                    <Button Width="42" Height="42" Background="#851D1D" BorderThickness="0"
+                                           x:Name="DeleteButton" Click="DeleteButton_Click" Tag="{Binding Id}">
                                         <Button.Resources>
                                             <Style TargetType="Border">
                                                 <Setter Property="CornerRadius" Value="8"/>

@@ -6,18 +6,22 @@ using System.Threading.Tasks;
 
 namespace PC_Configurator.Models
 {
-    internal class Case
+    public class Case
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string FormFactor { get; set; }
+        public string Color { get; set; } = "Black";  // Default value
+        public decimal Price { get; set; }
         
         public Case() { }
-        public Case(int id, string name, string formFactor)
+        public Case(int id, string name, string formFactor, string color = "Black", decimal price = 0)
         {
             Id = id;
             Name = name;
             FormFactor = formFactor;
+            Color = color;
+            Price = price;
         }
 
         public void SaveToDatabase()
@@ -27,10 +31,33 @@ namespace PC_Configurator.Models
             {
                 connection.Open();
                 using (var command = new System.Data.SqlClient.SqlCommand(
-                    "INSERT INTO Cases (Name, FormFactor) VALUES (@Name, @FormFactor)", connection))
+                    "INSERT INTO Cases (Name, FormFactor, Color, Price) " +
+                    "VALUES (@Name, @FormFactor, @Color, @Price)", connection))
                 {
                     command.Parameters.AddWithValue("@Name", Name);
                     command.Parameters.AddWithValue("@FormFactor", FormFactor);
+                    command.Parameters.AddWithValue("@Color", Color);
+                    command.Parameters.AddWithValue("@Price", Price);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void UpdateInDatabase()
+        {
+            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+            using (var connection = new System.Data.SqlClient.SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new System.Data.SqlClient.SqlCommand(
+                    "UPDATE Cases SET Name = @Name, FormFactor = @FormFactor, Color = @Color, " +
+                    "Price = @Price WHERE Id = @Id", connection))
+                {
+                    command.Parameters.AddWithValue("@Id", Id);
+                    command.Parameters.AddWithValue("@Name", Name);
+                    command.Parameters.AddWithValue("@FormFactor", FormFactor);
+                    command.Parameters.AddWithValue("@Color", Color);
+                    command.Parameters.AddWithValue("@Price", Price);
                     command.ExecuteNonQuery();
                 }
             }

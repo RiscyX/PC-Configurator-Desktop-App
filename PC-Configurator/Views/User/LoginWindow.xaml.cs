@@ -68,6 +68,25 @@ namespace PC_Configurator.Views.User
             string passwordHash = HashPassword(password);            if (CheckCredentials(email, passwordHash))
             {
                 string role = GetUserRole(email);
+                Console.WriteLine($"User login successful: {email}, Role: {role}");
+                
+                // Set current user in PermissionManager
+                if (PC_Configurator.Helpers.PermissionManager.SetCurrentUser(email))
+                {
+                    Console.WriteLine("PermissionManager.CurrentUser set successfully");
+                }
+                else
+                {
+                    // Ha a PermissionManager nem tudta beállítani a felhasználót, közvetlenül állítsuk be a szerepkört
+                    Console.WriteLine("Setting CurrentUser failed, using direct role setting");
+                    PC_Configurator.Models.Users user = new PC_Configurator.Models.Users
+                    {
+                        Email = email,
+                        Role = role
+                    };
+                    PC_Configurator.Helpers.PermissionManager.CurrentUser = user;
+                }
+                
                 var dashboard = new App.Dashboard(email, role);
                 dashboard.WindowState = WindowState.Maximized;
                 this.Close();

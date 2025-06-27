@@ -56,7 +56,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\RoleConverters.cs" />
+    <Compile Include="Helpers\ErrorHandler.cs" />
+    <Compile Include="Helpers\PermissionManager.cs" />
+    <Compile Include="Helpers\ValidationHelper.cs" />
     <Compile Include="Models\Case.cs" />
+    <Compile Include="Models\ComponentInfo.cs" />
+    <Compile Include="Models\ConfigurationModel.cs" />
     <Compile Include="Models\CPU.cs" />
     <Compile Include="Models\GPU.cs" />
     <Compile Include="Models\Motherboard.cs" />

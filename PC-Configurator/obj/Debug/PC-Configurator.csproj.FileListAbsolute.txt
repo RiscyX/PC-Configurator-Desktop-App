@@ -13,6 +13,9 @@ D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.csproj.Gen
 D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.csproj.CoreCompileInputs.cache
 D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.exe
 D:\Projects\PC-Configurator\PC-Configurator\obj\Debug\PC-Configurator.pdb
+D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\bin\Debug\PC-Configurator.exe.config
+D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\bin\Debug\PC-Configurator.exe
+D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\bin\Debug\PC-Configurator.pdb
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\PC-Configurator.csproj.AssemblyReference.cache
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\App\Dashboard.baml
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\User\LoginWindow.baml
@@ -27,6 +30,7 @@ D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\App\Dash
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\App\Profile.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\App\Users.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\Case.g.cs
+D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\CPU.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\GPU.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\Motherboard.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\PSU.g.cs
@@ -35,12 +39,9 @@ D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\St
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\User\LoginWindow.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\User\RegistrationWindow.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\App.g.cs
+D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\GeneratedInternalTypeHelper.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\PC-Configurator_MarkupCompile.cache
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\PC-Configurator_MarkupCompile.lref
-D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\bin\Debug\PC-Configurator.exe.config
-D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\bin\Debug\PC-Configurator.exe
-D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\bin\Debug\PC-Configurator.pdb
-D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\Forms\CPU.g.cs
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\App.baml
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\MainWindow.baml
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\obj\Debug\Views\App\AddComponents.baml

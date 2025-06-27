@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.ComponentModel; // DependencyPropertyDescriptor-hoz
+using PC_Configurator.Helpers; // PermissionManager és ErrorHandler használatához
 
 namespace PC_Configurator.Views.App
 {
@@ -35,18 +37,21 @@ namespace PC_Configurator.Views.App
                 SetTypeSelector(_currentType);
                 UpdateComponentTypeTitle(_currentType);
                 
+                // Admin jogosultság ellenőrzése a gombok megjelenítéséhez
+                SetupPermissions();
+                
                 try
                 {
                     LoadComponents(_currentType);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Hiba a komponensek betöltése közben: {ex.Message}\n\n{ex.StackTrace}", "Adatbetöltési hiba");
+                    ErrorHandler.HandleError(ex, "Komponensek betöltése");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Hiba az inicializálás során: {ex.Message}\n\n{ex.StackTrace}", "Inicializálási hiba");
+                ErrorHandler.HandleError(ex, "Komponensek inicializálása");
             }
         }private void SetTypeSelector(string type)
         {
@@ -663,6 +668,581 @@ namespace PC_Configurator.Views.App
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba az új komponens hozzáadása során: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SetupPermissions()
+        {
+            try
+            {
+                // Az adatok betöltése után a DataTemplate minden eleméhez beállítjuk az admin gombok láthatóságát
+                ComponentList.Loaded += ComponentList_Loaded;
+                
+                // ItemsControl elemei ütemezetten készülnek el, ezért feliratkozunk a konténerek létrehozására
+                ComponentList.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
+                
+                // A ComponentList.ItemsSource változásakor is frissítjük a láthatóságot
+                DependencyPropertyDescriptor descriptor = DependencyPropertyDescriptor.FromProperty(
+                    ItemsControl.ItemsSourceProperty,
+                    typeof(ListView)
+                );
+                
+                descriptor.AddValueChanged(ComponentList, ItemsSourceChanged);
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Admin jogosultságok beállítása");
+            }
+        }
+        
+        private void ComponentList_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Kezdeti betöltéskor az összes admin gomb láthatóságának beállítása
+                UpdateAdminButtonsVisibility();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a komponens lista betöltésekor: {ex.Message}");
+            }
+        }
+        
+        private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // Ha a konténerek elkészültek, frissítjük a gombok láthatóságát
+                if (ComponentList.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+                {
+                    UpdateAdminButtonsVisibility();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konténerek létrehozása közben: {ex.Message}");
+            }
+        }
+        
+        private void ItemsSourceChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // Késleltetett frissítés, hogy a konténerek biztosan elkészüljenek
+                ComponentList.Dispatcher.BeginInvoke(
+                    new Action(() => UpdateAdminButtonsVisibility()),
+                    System.Windows.Threading.DispatcherPriority.Loaded
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az adatforrás változásakor: {ex.Message}");
+            }
+        }
+        
+        private void UpdateAdminButtonsVisibility()
+        {
+            try
+            {
+                foreach (var item in ComponentList.Items)
+                {
+                    if (ComponentList.ItemContainerGenerator.ContainerFromItem(item) is FrameworkElement container)
+                    {
+                        ApplyAdminButtonsVisibility(container);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a gombok láthatóságának frissítésekor: {ex.Message}");
+            }
+        }
+        
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Jogosultság ellenőrzés
+                if (!PermissionManager.IsAdmin)
+                {
+                    ErrorHandler.ShowError("Csak admin felhasználók szerkeszthetik az alkatrészeket!", "Jogosultság megtagadva");
+                    return;
+                }
+                
+                Button btn = sender as Button;
+                if (btn != null)
+                {
+                    int componentId = Convert.ToInt32(btn.Tag);
+                    OpenEditFormByType(_currentType, componentId);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Komponens szerkesztése");
+            }
+        }
+        
+        private void OpenEditFormByType(string type, int id)
+        {
+            try
+            {
+                // Komponens adatok betöltése az adatbázisból
+                object component = LoadComponentById(type, id);
+                
+                if (component == null)
+                {
+                    MessageBox.Show($"A(z) {id} azonosítójú {type} komponens nem található.", 
+                        "Szerkesztési hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                
+                // A szerkesztési ablak létrehozása
+                Window editWindow = new Window
+                {
+                    Title = $"{type} szerkesztése",
+                    Width = 900,
+                    Height = 750,
+                    MinWidth = 850,
+                    MinHeight = 650,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    ResizeMode = ResizeMode.CanResize,
+                    SizeToContent = SizeToContent.Manual,
+                    Background = new SolidColorBrush(Color.FromRgb(18, 18, 18)) // #121212
+                };
+
+                // A megfelelő form betöltése a UserControl típus alapján
+                UserControl formControl = null;
+                
+                switch (type)
+                {
+                    case "CPU":
+                        formControl = new Views.Forms.CPU();
+                        ((Views.Forms.CPU)formControl).LoadForEdit(id);
+                        break;
+                        
+                    case "GPU":
+                        formControl = new Views.Forms.GPU();
+                        ((Views.Forms.GPU)formControl).LoadForEdit(id);
+                        break;
+                        
+                    case "RAM":
+                        formControl = new Views.Forms.RAM();
+                        ((Views.Forms.RAM)formControl).LoadForEdit(id);
+                        break;
+                        
+                    case "Storage":
+                        formControl = new Views.Forms.Storage();
+                        ((Views.Forms.Storage)formControl).LoadForEdit(id);
+                        break;
+                        
+                    case "Motherboard":
+                        formControl = new Views.Forms.Motherboard();
+                        // Alaplap betöltése szerkesztéshez
+                        var motherboard = component as Models.Motherboard;
+                        if (motherboard != null)
+                            ((Views.Forms.Motherboard)formControl).LoadForEdit(motherboard);
+                        break;
+                        
+                    case "PSU":
+                        formControl = new Views.Forms.PSU();
+                        var psuForm = (Views.Forms.PSU)formControl;
+                        psuForm.LoadForEdit(id);
+                        psuForm.CloseRequest += (s, e) => {
+                            editWindow.Close();  // Ablak bezárása
+                            LoadComponents(_currentType);  // Komponensek újratöltése
+                        };
+                        break;
+                        
+                    case "Case":
+                        formControl = new Views.Forms.Case();
+                        // Gépház betöltése szerkesztéshez
+                        var caseModel = component as Models.Case;
+                        if (caseModel != null)
+                            ((Views.Forms.Case)formControl).LoadForEdit(caseModel);
+                        break;
+                        
+                    default:
+                        MessageBox.Show($"Ismeretlen komponens típus: {type}", 
+                            "Szerkesztési hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                }
+                
+                // A form hozzáadása az ablakhoz, ha sikeresen létrehoztuk
+                if (formControl != null)
+                {
+                    // ScrollViewer létrehozása, hogy gördíthető legyen a tartalom
+                    ScrollViewer scrollViewer = new ScrollViewer
+                    {
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        Content = formControl
+                    };
+                    
+                    editWindow.Content = scrollViewer;
+                    editWindow.Owner = Window.GetWindow(this);
+                    editWindow.ShowDialog();
+                    
+                    // Form bezárása után frissítjük a listát
+                    LoadComponents(_currentType);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Szerkesztő űrlap megnyitása");
+                
+                // Fallback: demó üzenet a felhasználónak
+                MessageBox.Show($"A(z) {id} ID-jú {type} szerkesztése indulna! (Demó mód)", 
+                            "Demó szerkesztés", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        
+        private object LoadComponentById(string type, int id)
+        {
+            try
+            {
+                // Az adott típusú komponens betöltése az adatbázisból az ID alapján
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string tableName = GetTableNameByType(type);
+                    
+                    // Ellenőrizzük, hogy a tábla létezik-e az adatbázisban
+                    bool tableExists = false;
+                    string checkTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @TableName";
+                    using (var checkCmd = new System.Data.SqlClient.SqlCommand(checkTable, conn))
+                    {
+                        checkCmd.Parameters.AddWithValue("@TableName", tableName);
+                        int tableCount = (int)checkCmd.ExecuteScalar();
+                        tableExists = (tableCount > 0);
+                    }
+                    
+                    if (!tableExists)
+                    {
+                        ErrorHandler.ShowError($"A(z) {tableName} tábla nem található az adatbázisban.", "Adatbázis hiba");
+                        return null;
+                    }
+                    
+                    string query = $"SELECT * FROM {tableName} WHERE Id = @Id";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", id);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Itt a megfelelő típusú objektumot hozzuk létre
+                                switch (type)
+                                {
+                                    case "CPU":
+                                        return new Models.CPU
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            Manufacturer = HasColumn(reader, "Manufacturer") ? reader["Manufacturer"].ToString() : "Ismeretlen",
+                                            Socket = HasColumn(reader, "Socket") ? reader["Socket"].ToString() : "LGA1200",
+                                            Cores = HasColumn(reader, "Cores") ? Convert.ToInt32(reader["Cores"]) : 4,
+                                            Threads = HasColumn(reader, "Threads") ? Convert.ToInt32(reader["Threads"]) : 8,
+                                            BaseClockGHz = HasColumn(reader, "BaseClockGHz") ? (float)Convert.ToDouble(reader["BaseClockGHz"]) : 3.5f,
+                                            BoostClockGHz = HasColumn(reader, "BoostClockGHz") ? (float)Convert.ToDouble(reader["BoostClockGHz"]) : 4.0f,
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value ? Convert.ToDecimal(reader["Price"]) : 0
+                                        };
+                                    
+                                    case "GPU":
+                                        return new Models.GPU
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            Manufacturer = reader["Manufacturer"].ToString(),
+                                            MemoryGB = Convert.ToInt32(reader["MemoryGB"]),
+                                            // A MemoryType és Price nem biztos hogy szerepel a táblában
+                                            MemoryType = HasColumn(reader, "MemoryType") && reader["MemoryType"] != DBNull.Value 
+                                                ? reader["MemoryType"].ToString() 
+                                                : "GDDR6",
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value 
+                                                ? Convert.ToDecimal(reader["Price"]) 
+                                                : 0
+                                        };
+                                    
+                                    case "RAM":
+                                        return new Models.RAM
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            CapacityGB = Convert.ToInt32(reader["CapacityGB"]),
+                                            SpeedMHz = Convert.ToInt32(reader["SpeedMHz"]),
+                                            Type = HasColumn(reader, "Type") && reader["Type"] != DBNull.Value 
+                                                ? reader["Type"].ToString() 
+                                                : "DDR4",
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value 
+                                                ? Convert.ToDecimal(reader["Price"]) 
+                                                : 0
+                                        };
+                                    
+                                    case "Storage":
+                                        return new Models.Storage
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            Type = HasColumn(reader, "Type") && reader["Type"] != DBNull.Value
+                                                ? reader["Type"].ToString()
+                                                : "SSD",
+                                            CapacityGB = Convert.ToInt32(reader["CapacityGB"]),
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["Price"])
+                                                : 0
+                                        };
+                                        
+                                    case "PSU":
+                                        return new Models.PSU
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            Wattage = Convert.ToInt32(reader["Wattage"]),
+                                            EfficiencyRating = HasColumn(reader, "EfficiencyRating") && reader["EfficiencyRating"] != DBNull.Value
+                                                ? reader["EfficiencyRating"].ToString()
+                                                : "80+",
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["Price"])
+                                                : 0
+                                        };
+                                        
+                                    case "Motherboard":
+                                        return new Models.Motherboard
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            Manufacturer = HasColumn(reader, "Manufacturer") ? reader["Manufacturer"].ToString() : "Ismeretlen",
+                                            Chipset = HasColumn(reader, "Chipset") ? reader["Chipset"].ToString() : "B660",
+                                            Socket = HasColumn(reader, "Socket") ? reader["Socket"].ToString() : "LGA1700",
+                                            FormFactor = HasColumn(reader, "FormFactor") ? reader["FormFactor"].ToString() : "ATX",
+                                            MaxMemoryGB = HasColumn(reader, "MaxMemoryGB") ? Convert.ToInt32(reader["MaxMemoryGB"]) : 128,
+                                            PowerConsumption = HasColumn(reader, "PowerConsumption") ? Convert.ToInt32(reader["PowerConsumption"]) : 65,
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["Price"])
+                                                : 0
+                                        };
+                                        
+                                    case "Case":
+                                        return new Models.Case
+                                        {
+                                            Id = id,
+                                            Name = reader["Name"].ToString(),
+                                            FormFactor = HasColumn(reader, "FormFactor") ? reader["FormFactor"].ToString() : "ATX",
+                                            Color = HasColumn(reader, "Color") ? reader["Color"].ToString() : "Black",
+                                            Price = HasColumn(reader, "Price") && reader["Price"] != DBNull.Value
+                                                ? Convert.ToDecimal(reader["Price"])
+                                                : 0
+                                        };
+                                    
+                                    // További komponens típusok betöltése hasonló módon...
+                                    
+                                    default:
+                                        throw new ArgumentException($"Ismeretlen komponens típus: {type}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Részletesebb hibaüzenet megjelenítése
+                ErrorHandler.HandleDatabaseError(ex, "betöltés", type);
+                System.Diagnostics.Debug.WriteLine($"Hiba a {type} komponens betöltése közben (ID: {id}): {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                
+                // Ha ellenőrizni szeretnénk az adatbázis kapcsolatot
+                try
+                {
+                    string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                    using (var testConn = new System.Data.SqlClient.SqlConnection(connStr))
+                    {
+                        testConn.Open();
+                        System.Diagnostics.Debug.WriteLine("Adatbázis kapcsolat sikeres");
+                    }
+                }
+                catch (Exception dbEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Hiba az adatbázis kapcsolat tesztelése közben: {dbEx.Message}");
+                }
+            }
+            
+            // Fallback: null visszaadása hiba esetén
+            return null;
+        }
+        
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!PermissionManager.IsAdmin)
+            {
+                MessageBox.Show("Csak admin felhasználók törölhetik az alkatrészeket!", 
+                                "Jogosultság megtagadva", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            Button btn = sender as Button;
+            if (btn != null)
+            {
+                int componentId = Convert.ToInt32(btn.Tag);
+                MessageBoxResult result = MessageBox.Show($"Biztosan törölni szeretné a(z) {componentId} ID-jú alkatrészt?", 
+                                             "Törlés megerősítése", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // Itt jöne a törlés logikája
+                        DeleteComponentById(componentId);
+                        // Frissítsük a listát a törlés után
+                        LoadComponents(_currentType);
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorHandler.HandleDatabaseError(ex, "törlés", _currentType);
+                    }
+                }
+            }
+        }
+        
+        private void DeleteComponentById(int id)
+        {
+            try
+            {
+                // A komponens típusától függően törlési logika az adatbázisból
+                // Valós adatbázis esetén:
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    try
+                    {
+                        conn.Open();
+                        string tableName = GetTableNameByType(_currentType);
+                        string query = $"DELETE FROM {tableName} WHERE Id = @Id";
+                        
+                        using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@Id", id);
+                            int affected = cmd.ExecuteNonQuery();
+                            
+                            if (affected > 0)
+                            {
+                                // Sikeres törlés
+                                MessageBox.Show($"A(z) {id} azonosítójú {_currentType} komponens sikeresen törölve.", 
+                                            "Sikeres törlés", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                // Nem létezik ilyen ID
+                                ErrorHandler.ShowError($"A megadott azonosítójú ({id}) komponens nem található vagy már törölve lett.", "Törlési hiba");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Adatbázis hiba esetén
+                        ErrorHandler.HandleError(ex, "Komponens törlése");
+                        
+                        // Fallback: demó üzenet a felhasználónak
+                        MessageBox.Show($"A(z) {id} ID-jú {_currentType} sikeresen törölve lenne! (Demó mód)", 
+                                    "Demó törlés", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Komponens törlés");
+            }
+        }
+        
+        private string GetTableNameByType(string type)
+        {
+            // A komponens típusa alapján visszaadja a megfelelő táblanevet
+            switch (type)
+            {
+                case "CPU": return "CPUs";
+                case "GPU": return "GPUs";
+                case "RAM": return "RAMs";
+                case "Storage": return "Storages";
+                case "Motherboard": return "Motherboards";
+                case "PSU": return "PSUs";
+                case "Case": return "Cases";
+                default: throw new ArgumentException($"Ismeretlen komponens típus: {type}");
+            }
+        }
+
+        private void ApplyAdminButtonsVisibility(FrameworkElement container)
+        {
+            try
+            {
+                // A container elemben megkeressük az AdminButtons StackPanelt
+                if (FindChild<StackPanel>(container, "AdminButtons") is StackPanel adminButtons)
+                {
+                    // Admin felhasználó esetén látszik, más esetben nem
+                    adminButtons.Visibility = PermissionManager.IsAdmin ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Hiba esetén nem bukunk el, csak logolja a hibát
+                System.Diagnostics.Debug.WriteLine($"Hiba az admin gombok láthatóságának beállításakor: {ex.Message}");
+            }
+        }
+        
+        // Segédfüggvény UI elem kereséséhez a vizuális fában
+        private static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is FrameworkElement fe && fe.Name == childName && child is T)
+                {
+                    return (T)child;
+                }
+                
+                T foundChild = FindChild<T>(child, childName);
+                if (foundChild != null) return foundChild;
+            }
+            
+            return null;
+        }
+        
+        // Segédfüggvény az oszlopok ellenőrzéséhez
+        private bool HasColumn(System.Data.SqlClient.SqlDataReader reader, string columnName)
+        {
+            if (reader == null)
+                return false;
+            
+            // Biztonságosabb módszer a oszlop létezésének ellenőrzésére
+            try
+            {
+                // Ha ez az oszlop nem létezik, akkor kivételt dob
+                var schemaTable = reader.GetSchemaTable();
+                bool hasColumn = false;
+                
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    if (string.Equals(reader.GetName(i), columnName, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        hasColumn = true;
+                        break;
+                    }
+                }
+                
+                // Debug információ
+                System.Diagnostics.Debug.WriteLine($"Oszlop ellenőrzése: {columnName} - {(hasColumn ? "Létezik" : "Nem létezik")}");
+                
+                return hasColumn;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az oszlop ellenőrzése közben: {columnName} - {ex.Message}");
+                return false;
             }
         }
     }

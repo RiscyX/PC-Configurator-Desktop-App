@@ -108,15 +108,19 @@
             <StackPanel HorizontalAlignment="Center" Width="700">
                 <TextBlock Text="CPU hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
                 <TextBlock Text="Név" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
+                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="NameErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Gyártó" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="ManufacturerComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectedIndex="0">
+                <ComboBox x:Name="ManufacturerComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="AMD" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="Intel" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="ManufacturerErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 
                 <TextBlock Text="Magok száma" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="CoresComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectedIndex="0">
+                <ComboBox x:Name="CoresComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="2" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="4" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="6" Foreground="White" Background="#1E1E1E"/>
@@ -134,8 +138,10 @@
                     <ComboBoxItem Content="30" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="32" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="CoresErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Szálak száma" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="ThreadsComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectedIndex="0">
+                <ComboBox x:Name="ThreadsComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="2" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="4" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="6" Foreground="White" Background="#1E1E1E"/>
@@ -153,10 +159,27 @@
                     <ComboBoxItem Content="30" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="32" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="ThreadsErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Alap órajel (GHz)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="BaseClockTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
+                <TextBox x:Name="BaseClockTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="BaseClockErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Max órajel (GHz)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="BoostClockTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,40"/>
+                <TextBox x:Name="BoostClockTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="BoostClockErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+
+                <TextBlock Text="Foglalat" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
+                <TextBox x:Name="SocketTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="SocketErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Ár (HUF)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
+                <TextBox x:Name="PriceTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PriceErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+
+                <TextBlock Text="Fogyasztás (W)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
+                <TextBox x:Name="PowerConsumptionTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PowerConsumptionErrorBlock" Style="{StaticResource ValidationErrorText}"/>
+
+                <TextBlock x:Name="FormTitle" Text="CPU hozzáadása" Visibility="Collapsed"/>
                 
                 <Button x:Name="SaveButton" Content="Mentés" 
                         Width="240" Height="60" Margin="0,10,0,20"

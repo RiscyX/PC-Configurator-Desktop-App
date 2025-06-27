@@ -5,8 +5,164 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PC_Configurator.Views.App"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
             
+            <TextBlock Text="Felhasználók kezelése" 
+                       FontSize="24" 
+                       FontWeight="SemiBold" 
+                       Foreground="#333333" 
+                       VerticalAlignment="Center"/>
+                       
+            <Button x:Name="RefreshButton" 
+                    Grid.Column="1" 
+                    Content="Frissítés" 
+                    Padding="15,8" 
+                    Background="#0078D4" 
+                    Foreground="White"
+                    BorderThickness="0"
+                    Click="RefreshButton_Click">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </Grid>
+        
+        <!-- Users ListView -->
+        <ListView x:Name="UsersListView" 
+                  Grid.Row="1"
+                  BorderThickness="1"
+                  BorderBrush="#DDDDDD">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Iniciálék" Width="70">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Width="40" Height="40" 
+                                        CornerRadius="20" 
+                                        Background="#0078D4">
+                                    <TextBlock Text="{Binding Initials}" 
+                                               Foreground="White" 
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" 
+                                               HorizontalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Header="Email" Width="200">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Email}" 
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Header="Név" Width="150">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding FullName}" 
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Header="Jogosultság" Width="100">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}}"
+                                        CornerRadius="4"
+                                        Padding="8,4">
+                                    <TextBlock Text="{Binding Role}"
+                                               Foreground="White" 
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Header="Regisztrált" Width="100">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding CreatedString}" 
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Header="Utolsó belépés" Width="150">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding LastLoginString}" 
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Header="Műveletek" Width="180">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="{Binding IsAdmin, Converter={StaticResource AdminRoleConverter}}" 
+                                            Click="ChangeRole_Click"
+                                            Margin="0,0,5,0"
+                                            Padding="8,3"
+                                            Background="#0078D4"
+                                            Foreground="White"
+                                            BorderThickness="0">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="4"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    
+                                    <Button Content="Törlés" 
+                                            Click="DeleteUser_Click"
+                                            Padding="8,3"
+                                            Background="#E81123"
+                                            Foreground="White"
+                                            BorderThickness="0">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="4"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+            
+            <!-- Empty state -->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
     </Grid>
+    
+    <UserControl.Resources>
+        <local:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <local:AdminRoleTextConverter x:Key="AdminRoleConverter"/>
+    </UserControl.Resources>
 </UserControl>

@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 using PC_Configurator.Views.App;
+using PC_Configurator.Helpers;
 namespace PC_Configurator.Views.App
 {
     /// <summary>
@@ -86,7 +87,10 @@ namespace PC_Configurator.Views.App
             SidebarMenu.Children.Add(CreateNavButton("Fiókom", typeof(PC_Configurator.Views.App.Profile), "\uE77B"));
             
             // Admin-only menu items
-            if (userRole.ToLower() == "admin")
+            bool isAdmin = userRole.ToLower() == "admin" || PermissionManager.IsCurrentUserAdmin();
+            Console.WriteLine($"Dashboard menu check: UserRole={userRole}, IsAdmin from role={userRole.ToLower() == "admin"}, IsAdmin from PermissionManager={PermissionManager.IsCurrentUserAdmin()}, Final IsAdmin={isAdmin}");
+            
+            if (isAdmin)
             {
                 // Add admin category label
                 AddCategoryLabel("Adminisztráció");
@@ -166,6 +170,30 @@ namespace PC_Configurator.Views.App
         {
             try
             {
+                Console.WriteLine($"SetActivePage: {userControlType.Name}");
+                
+                // Admin oldalak ellenőrzése navigáció előtt
+                bool isAdminPage = 
+                    userControlType == typeof(PC_Configurator.Views.App.AddComponents) ||
+                    userControlType == typeof(PC_Configurator.Views.App.AdminSettings) ||
+                    userControlType == typeof(PC_Configurator.Views.App.Users);
+                
+                bool isAdmin = UserRole.ToLower() == "admin" || PermissionManager.IsCurrentUserAdmin();
+                Console.WriteLine($"Navigation check: IsAdminPage={isAdminPage}, UserRole={UserRole}, IsAdmin={isAdmin}");
+                
+                // Ha admin oldalt próbálunk megnyitni, de nincs jogosultság, átirányítunk a Profil oldalra
+                if (isAdminPage && !isAdmin)
+                {
+                    Console.WriteLine("Access denied to admin page, redirecting to Profile");
+                    MessageBox.Show(
+                        "Nincs jogosultsága ehhez az oldalhoz! Ez az oldal csak rendszergazdák számára érhető el.",
+                        "Hozzáférés megtagadva",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    
+                    userControlType = typeof(PC_Configurator.Views.App.Profile);
+                }
+                
                 // Create appropriate instance based on type
                 object control = null;
                 if (userControlType == typeof(PC_Configurator.Views.App.Profile))
@@ -174,6 +202,17 @@ namespace PC_Configurator.Views.App
                 }
                 else
                 {
+                    // Ha a PermissionManager.CurrentUser nincs beállítva, állítsuk be itt
+                    if (isAdmin && PermissionManager.CurrentUser == null)
+                    {
+                        Console.WriteLine("Setting PermissionManager.CurrentUser from Dashboard");
+                        PermissionManager.CurrentUser = new PC_Configurator.Models.Users 
+                        { 
+                            Email = UserEmail, 
+                            Role = UserRole
+                        };
+                    }
+                    
                     control = Activator.CreateInstance(userControlType);
                 }
 

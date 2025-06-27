@@ -106,11 +106,13 @@
                 <DropShadowEffect ShadowDepth="2" Opacity="0.2" BlurRadius="10" />
             </Border.Effect>
             <StackPanel HorizontalAlignment="Center" Width="700">
-                <TextBlock Text="Tápegység hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
+                <TextBlock x:Name="FormTitle" Text="Tápegység hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
                 <TextBlock Text="Név" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
-                <TextBlock Text="Teljesítmény (Watt)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="WattageComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,25" SelectedIndex="0">
+                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="NameError" Style="{StaticResource ValidationErrorText}"/>
+
+                <TextBlock Text="Teljesítmény (Watt)" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <ComboBox x:Name="WattageComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
                     <ComboBoxItem Content="400" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="450" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="500" Foreground="White" Background="#1E1E1E"/>
@@ -124,9 +126,11 @@
                     <ComboBoxItem Content="1000" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="1100" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="1200" Foreground="White" Background="#1E1E1E"/>
-                </ComboBox>                
-                <TextBlock Text="Hatásfok" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="EfficiencyRatingComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,40" SelectedIndex="0">
+                </ComboBox>  
+                <TextBlock x:Name="WattageError" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Hatásfok" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <ComboBox x:Name="EfficiencyRatingComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
                     <ComboBoxItem Content="80+" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="80+ Bronze" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="80+ Silver" Foreground="White" Background="#1E1E1E"/>
@@ -134,6 +138,11 @@
                     <ComboBoxItem Content="80+ Platinum" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="80+ Titanium" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="EfficiencyError" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Ár (Ft)" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <TextBox x:Name="PriceTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PriceError" Style="{StaticResource ValidationErrorText}"/>
                 
                 <Button x:Name="SaveButton" Content="Mentés" 
                         Width="240" Height="60" Margin="0,30,0,20"

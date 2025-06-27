@@ -106,16 +106,33 @@
                 <DropShadowEffect ShadowDepth="2" Opacity="0.2" BlurRadius="10" />
             </Border.Effect>
             <StackPanel HorizontalAlignment="Center" Width="700">
-                <TextBlock Text="Gépház hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
+                <TextBlock x:Name="FormTitle" Text="Gépház hozzáadása" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,40"/>
                 <TextBlock Text="Név" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,25"/>
-                <TextBlock Text="Formátum" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <ComboBox x:Name="FormFactorComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,40" SelectedIndex="0">
+                <TextBox x:Name="NameTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="NameError" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Formátum" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <ComboBox x:Name="FormFactorComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
                     <ComboBoxItem Content="ATX" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="Micro-ATX" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="Mini-ITX" Foreground="White" Background="#1E1E1E"/>
                     <ComboBoxItem Content="E-ATX" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
+                <TextBlock x:Name="FormFactorError" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Szín" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <ComboBox x:Name="ColorComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectedIndex="0">
+                    <ComboBoxItem Content="Fekete" Foreground="White" Background="#1E1E1E"/>
+                    <ComboBoxItem Content="Fehér" Foreground="White" Background="#1E1E1E"/>
+                    <ComboBoxItem Content="Ezüst" Foreground="White" Background="#1E1E1E"/>
+                    <ComboBoxItem Content="Kék" Foreground="White" Background="#1E1E1E"/>
+                    <ComboBoxItem Content="Piros" Foreground="White" Background="#1E1E1E"/>
+                </ComboBox>
+                <TextBlock x:Name="ColorError" Style="{StaticResource ValidationErrorText}"/>
+                
+                <TextBlock Text="Ár (HUF)" Foreground="#AAAAAA" FontSize="16" Margin="0,20,0,8"/>
+                <TextBox x:Name="PriceTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <TextBlock x:Name="PriceError" Style="{StaticResource ValidationErrorText}"/>
                 
                 <Button x:Name="SaveButton" Content="Mentés" 
                         Width="240" Height="60" Margin="0,30,0,20"
