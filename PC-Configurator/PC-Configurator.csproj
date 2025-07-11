@@ -57,6 +57,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\RoleConverters.cs" />
+    <Compile Include="Helpers\ChipsetHelper.cs" />
     <Compile Include="Helpers\ErrorHandler.cs" />
     <Compile Include="Helpers\PermissionManager.cs" />
     <Compile Include="Helpers\ValidationHelper.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Models\Motherboard.cs" />
     <Compile Include="Models\PSU.cs" />
     <Compile Include="Models\RAM.cs" />
+    <Compile Include="Models\SqlDataReaderExtensions.cs" />
     <Compile Include="Models\Storage.cs" />
     <Compile Include="Models\Users.cs" />
     <Compile Include="Views\App\AddComponents.xaml.cs">
@@ -81,6 +83,8 @@
     </Compile>
     <Compile Include="Views\App\ConfigBuilder.xaml.cs">
       <DependentUpon>ConfigBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\App\ConfigBuilderStore.cs">
     </Compile>
     <Compile Include="Views\App\Configs.xaml.cs">
       <DependentUpon>Configs.xaml</DependentUpon>

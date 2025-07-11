@@ -21,6 +21,9 @@ namespace PC_Configurator.Views.Forms
     /// </summary>
     public partial class GPU : UserControl
     {
+        // Esemény a sikeres mentés jelzésére
+        public event EventHandler SaveCompleted;
+
         public GPU()
         {
             InitializeComponent();
@@ -105,9 +108,6 @@ namespace PC_Configurator.Views.Forms
                     model.Id = (int)Tag;
                     SaveChangesToDatabase(model);
                     MessageBox.Show("Videokártya sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                    
-                    // Az ablak bezárása, ha szerkesztési módban vagyunk
-                    Window.GetWindow(this)?.Close();
                 }
                 else
                 {
@@ -118,6 +118,9 @@ namespace PC_Configurator.Views.Forms
                     // Űrlap törlése
                     ResetForm();
                 }
+
+                // SaveCompleted esemény kiváltása
+                SaveCompleted?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {

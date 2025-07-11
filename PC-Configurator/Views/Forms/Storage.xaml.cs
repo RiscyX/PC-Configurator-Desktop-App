@@ -23,6 +23,9 @@ namespace PC_Configurator.Views.Forms
     /// </summary>
     public partial class Storage : UserControl
     {
+        // Esemény a sikeres mentés jelzésére
+        public event EventHandler SaveCompleted;
+
         private int _editId = 0; // 0 = új elem, >0 = meglévő szerkesztése
         private bool _isEditMode = false;
         
@@ -199,6 +202,9 @@ namespace PC_Configurator.Views.Forms
                 {
                     SaveChangesToDatabase(model);
                     MessageBox.Show("Meghajtó sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                    
+                    // Sikeres mentés után kiváltjuk az eseményt
+                    SaveCompleted?.Invoke(this, EventArgs.Empty);
                 }
                 else
                 {
@@ -220,6 +226,9 @@ namespace PC_Configurator.Views.Forms
                 
                 // Hibaüzenetek elrejtése
                 ValidationHelper.ClearErrors(NameError, TypeError, CapacityError, PriceError, PowerConsumptionError);
+                
+                // Esemény kiváltása a sikeres mentés jelzésére
+                SaveCompleted?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {

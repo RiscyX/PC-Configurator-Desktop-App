@@ -13,6 +13,8 @@ namespace PC_Configurator.Models
         public string FormFactor { get; set; }
         public string Color { get; set; } = "Black";  // Default value
         public decimal Price { get; set; }
+        public string Manufacturer { get; set; }
+        public string SupportedFormFactors { get; set; }
         
         public Case() { }
         public Case(int id, string name, string formFactor, string color = "Black", decimal price = 0)
@@ -61,6 +63,17 @@ namespace PC_Configurator.Models
                     command.ExecuteNonQuery();
                 }
             }
+        }
+        
+        /// <summary>
+        /// Ellenőrzi, hogy a ház támogatja-e az adott formfaktort
+        /// </summary>
+        /// <param name="formFactor">Az ellenőrizendő formfaktor</param>
+        /// <returns>True, ha a ház támogatja a megadott formfaktort</returns>
+        public bool SupportsFormFactor(string formFactor)
+        {
+            // Alapértelmezetten támogat minden formfaktort (egyszerűsített verzió)
+            return true;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace PC_Configurator.Models
         public string Details { get; set; }
         public decimal Price { get; set; }
         public int Power { get; set; }
+        public int PowerConsumption { get { return Power; } set { Power = value; } }
         public string Type { get; set; }
 
         public ComponentInfo()
@@ -53,7 +54,7 @@ namespace PC_Configurator.Models
             {
                 Id = gpu.Id,
                 Name = gpu.Name,
-                Details = $"{gpu.Memory}GB {gpu.MemoryType}",
+                Details = $"{gpu.MemoryGB}GB {gpu.MemoryType}",
                 Price = 0,
                 Power = 0,
                 Type = "GPU"
@@ -98,7 +99,7 @@ namespace PC_Configurator.Models
             {
                 Id = storage.Id,
                 Name = storage.Name,
-                Details = $"{storage.Capacity}GB {storage.Type}",
+                Details = $"{storage.CapacityGB}GB {storage.Type}",
                 Price = 0,
                 Power = 0,
                 Type = "Storage"
@@ -113,7 +114,7 @@ namespace PC_Configurator.Models
             {
                 Id = psu.Id,
                 Name = psu.Name,
-                Details = $"{psu.Wattage}W, {psu.Efficiency}",
+                Details = $"{psu.Wattage}W, {psu.EfficiencyRating}",
                 Price = 0,
                 Power = 0,
                 Type = "PSU"

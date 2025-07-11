@@ -13,6 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PC_Configurator.Models;
+using PC_Configurator.Views.App;
 
 namespace PC_Configurator.Views.App
 {
@@ -38,184 +40,341 @@ namespace PC_Configurator.Views.App
         }
 
         private ObservableCollection<ConfigurationItem> _allConfigurations;
-        private ObservableCollection<ConfigurationItem> _filteredConfigurations;
 
+        private int _currentUserId = 0; // Az aktuális felhasználó azonosítója
+        
         public Configs()
         {
             InitializeComponent();
             
-            // Demo adatok betöltése
-            LoadDemoData();
-            
-            // Konfiguráció darabszám megjelenítése
-            UpdateConfigCounter();
-            
-            // Annak ellenőrzése, hogy van-e konfiguráció
-            CheckIfEmpty();
+            // Gyűjtemény inicializálása már a kezdetben
+            _allConfigurations = new ObservableCollection<ConfigurationItem>();
+
+            // Jelenlegi felhasználó azonosítója
+            // Ezt az értéket a bejelentkezett felhasználó azonosítójából kéne megszerezni,
+            // ami általában a Session-ben vagy más globális helyen tárolva van
+            try {
+                // Például, ha az App.xaml.cs-ben van egy CurrentUser property:
+                // _currentUserId = ((App)Application.Current).CurrentUser.Id;
+                
+                // Mivel nem látjuk ezt a kódrészt, itt most teszteléshez az 1-es ID-t használjuk
+                _currentUserId = 1;
+            }
+            catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"Nem sikerült lekérni a jelenlegi felhasználó azonosítóját: {ex.Message}");
+                _currentUserId = 1; // Alapértelmezett érték, ha hiba történik
+            }
+
+            try
+            {
+                // Adatbázisból töltjük be a konfigurációkat
+                LoadConfigurationsFromDatabase();
+                
+                // Konfiguráció darabszám megjelenítése
+                UpdateConfigCounter();
+                
+                // Annak ellenőrzése, hogy van-e konfiguráció
+                CheckIfEmpty();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a Configs inicializálásakor: {ex.Message}");
+                MessageBox.Show($"Hiba történt az alkalmazás indításakor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void LoadDemoData()
+        private void LoadConfigurationsFromDatabase()
         {
-            // Demo adatok létrehozása
-            _allConfigurations = new ObservableCollection<ConfigurationItem>
+            try
             {
-                new ConfigurationItem
+                // Inicializáljuk a gyűjteményeket üres listákkal, hogy biztosan ne legyenek null-ok
+                if (_allConfigurations == null)
                 {
-                    Id = 1,
-                    Name = "Játékra optimalizált konfiguráció",
-                    SaveDate = "2025.06.20. 15:30",
-                    CPU = "AMD Ryzen 7 5800X",
-                    GPU = "NVIDIA RTX 3070",
-                    RAM = "32GB DDR4 3600MHz",
-                    Motherboard = "MSI MAG B550",
-                    Storage = "1TB NVMe SSD",
-                    Case = "Lian Li PC-O11",
-                    Price = 435000,
-                    PerformanceScore = 85
-                },
-                new ConfigurationItem
-                {
-                    Id = 2,
-                    Name = "Irodai munkaállomás",
-                    SaveDate = "2025.06.18. 10:15",
-                    CPU = "Intel Core i5-12600K",
-                    GPU = "Integrated",
-                    RAM = "16GB DDR4 3200MHz",
-                    Motherboard = "Gigabyte Z690",
-                    Storage = "500GB SSD",
-                    Case = "Fractal Design Meshify",
-                    Price = 225000,
-                    PerformanceScore = 45
-                },
-                new ConfigurationItem
-                {
-                    Id = 3,
-                    Name = "Kreatív munkaállomás",
-                    SaveDate = "2025.06.15. 09:45",
-                    CPU = "AMD Ryzen 9 5900X",
-                    GPU = "NVIDIA RTX 3090",
-                    RAM = "64GB DDR4 3600MHz",
-                    Motherboard = "ASUS ROG X570",
-                    Storage = "2TB NVMe + 4TB HDD",
-                    Case = "be quiet! Dark Base 700",
-                    Price = 750000,
-                    PerformanceScore = 95
+                    _allConfigurations = new ObservableCollection<ConfigurationItem>();
                 }
-            };
-
-            _filteredConfigurations = new ObservableCollection<ConfigurationItem>(_allConfigurations);
+                else
+                {
+                    _allConfigurations.Clear();
+                }
+                
+                // A szűrési funkció el lett távolítva
+                
+                List<ConfigurationModel> configModels = null;
+                
+                try
+                {
+                    // Konfigurációk lekérése a vw_FullConfigurations nézetből a felhasználó azonosítója alapján
+                    // A vw_FullConfigurations már tartalmazza az összes komponenst és azok adatait, így nincs szükség további lekérésekre
+                    configModels = ConfigurationModel.LoadUserConfigurations(_currentUserId);
+                    
+                    // Debug információ
+                    System.Diagnostics.Debug.WriteLine($"Sikeresen betöltve {configModels?.Count ?? 0} konfiguráció modell és komponenseik a vw_FullConfigurations nézetből.");
+                }
+                catch (Exception loadEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Hiba a konfigurációk lekérésekor a vw_FullConfigurations nézetből: {loadEx.Message}");
+                    configModels = new List<ConfigurationModel>(); // Ha hiba van, üres listát használunk
+                }
+                
+                // Csak akkor próbálunk feldolgozni, ha valóban vannak konfiguációk
+                if (configModels != null && configModels.Count > 0)
+                {
+                    // Végigmegyünk minden egyes konfiguráción
+                    foreach (var configModel in configModels)
+                    {
+                        try
+                        {
+                            if (configModel != null)
+                            {
+                                try
+                                {
+                                    // Mivel a configModel már tartalmazza az összes adatot a vw_FullConfigurations nézetből,
+                                    // nincs szükség újabb adatbázis lekérdezésre
+                                    
+                                    // Már itt van minden komponens adata a vw_FullConfigurations nézetből, 
+                                    // ezért nincs szükség a konfigurációk újratöltésére
+                                    
+                                    // Részletes log a komponensekről
+                                    System.Diagnostics.Debug.WriteLine($"Konfiguráció ID {configModel.Id} komponensei: " +
+                                        $"\nCPU: {(configModel.CPU != null ? configModel.CPU.Manufacturer + " " + configModel.CPU.Name : "hiányzik")}, " +
+                                        $"\nGPU: {(configModel.GPU != null ? configModel.GPU.Manufacturer + " " + configModel.GPU.Name : "hiányzik")}, " +
+                                        $"\nRAM: {(configModel.RAM != null ? configModel.RAM.CapacityGB + "GB " + configModel.RAM.Type : "hiányzik")}, " +
+                                        $"\nMotherboard: {(configModel.Motherboard != null ? configModel.Motherboard.Manufacturer + " " + configModel.Motherboard.Name : "hiányzik")}, " +
+                                        $"\nStorage: {(configModel.Storage != null ? configModel.Storage.CapacityGB + "GB " + configModel.Storage.Type : "hiányzik")}, " +
+                                        $"\nCase: {(configModel.Case != null ? configModel.Case.Name : "hiányzik")}");
+                                    
+                                    // A konfigurációt közvetlenül konvertáljuk és adjuk hozzá a listához
+                                    var configItem = ConvertToConfigurationItem(configModel);
+                                    _allConfigurations.Add(configItem);
+                                }
+                                catch (Exception componentEx)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció ({configModel.Id}) feldolgozása közben: {componentEx.Message}");
+                                    if (componentEx.InnerException != null)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"Belső kivétel: {componentEx.InnerException.Message}");
+                                    }
+                                    
+                                    // Megpróbáljuk menteni ami menthető, és konvertáljuk az eredeti configmodelt
+                                    var configItem = ConvertToConfigurationItem(configModel);
+                                    _allConfigurations.Add(configItem);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Ha egy konfiguráció betöltése hibát okoz, azt loggoljuk, de folytatjuk a többivel
+                            System.Diagnostics.Debug.WriteLine($"Hiba egy konfiguráció feldolgozásakor: {ex.Message}");
+                        }
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Sikeresen betöltve {_allConfigurations.Count} konfiguráció az adatbázisból a {_currentUserId} azonosítójú felhasználó számára");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfigurációk betöltése közben: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Belső hiba: {ex.InnerException.Message}");
+                }
+                
+                // Hibaüzenet megjelenítése a felhasználónak
+                MessageBox.Show($"Nem sikerült betölteni a konfigurációkat: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
+            // Frissítjük a megjelenítést, attól függetlenül, hogy sikerült-e betölteni adatokat
+            try {
+                RefreshConfigList();
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"Hiba a lista frissítésekor: {ex.Message}");
+            }
         }
 
         private void UpdateConfigCounter()
         {
-            int count = _filteredConfigurations.Count;
-            ConfigCountBlock.Text = $"{count} konfiguráció";
+            try
+            {
+                // Null ellenőrzés a gyűjteményre - csak az _allConfigurations-t használjuk
+                if (_allConfigurations == null)
+                {
+                    _allConfigurations = new ObservableCollection<ConfigurationItem>();
+                }
+                
+                // Null ellenőrzés a kontrollra
+                if (ConfigCountBlock == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("ConfigCountBlock kontroll null az UpdateConfigCounter metódusban!");
+                    return;
+                }
+                
+                int count = _allConfigurations.Count;
+                ConfigCountBlock.Text = $"{count} konfiguráció";
+                ConfigCountBlock.FontSize = 20; // Nagyobb betűméret a számlálónak
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció számláló frissítésekor: {ex.Message}");
+            }
         }
 
         private void CheckIfEmpty()
         {
-            if (_filteredConfigurations.Count == 0)
+            try
             {
-                EmptyState.Visibility = Visibility.Visible;
-                ConfigList.Visibility = Visibility.Collapsed;
+                // Kontrollok null ellenőrzése
+                if (EmptyState == null || ConfigList == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("EmptyState vagy ConfigList kontroll null a CheckIfEmpty metódusban!");
+                    return;
+                }
+                
+                // Gyűjtemény null ellenőrzése - csak az _allConfigurations-t használjuk
+                if (_allConfigurations == null || _allConfigurations.Count == 0)
+                {
+                    EmptyState.Visibility = Visibility.Visible;
+                    ConfigList.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    EmptyState.Visibility = Visibility.Collapsed;
+                    ConfigList.Visibility = Visibility.Visible;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                EmptyState.Visibility = Visibility.Collapsed;
-                ConfigList.Visibility = Visibility.Visible;
+                System.Diagnostics.Debug.WriteLine($"Hiba az üres állapot ellenőrzésekor: {ex.Message}");
+            }
+        }
+        
+        // Helper metódus a ConfigurationModel átalakításához ConfigurationItem formátumba
+        private ConfigurationItem ConvertToConfigurationItem(ConfigurationModel config)
+        {
+            if (config == null)
+            {
+                return new ConfigurationItem
+                {
+                    Id = 0,
+                    Name = "Ismeretlen konfiguráció",
+                    SaveDate = DateTime.Now.ToString("yyyy.MM.dd. HH:mm"),
+                    CPU = "Nincs kiválasztva",
+                    GPU = "Nincs kiválasztva",
+                    RAM = "Nincs kiválasztva",
+                    Motherboard = "Nincs kiválasztva",
+                    Storage = "Nincs kiválasztva",
+                    Case = "Nincs kiválasztva",
+                    Price = 0,
+                    PerformanceScore = 0
+                };
+            }
+            
+            try
+            {
+                // Komponensek adatainak előkészítése a megjelenítéshez
+                string cpuText = config.CPU != null ? $"{config.CPU.Manufacturer} {config.CPU.Name}" : "Nincs kiválasztva";
+                string gpuText = config.GPU != null ? $"{config.GPU.Manufacturer} {config.GPU.Name}" : "Nincs kiválasztva";
+                string ramText = config.RAM != null ? $"{config.RAM.CapacityGB}GB {config.RAM.Type} {config.RAM.SpeedMHz}MHz" : "Nincs kiválasztva";
+                string mbText = config.Motherboard != null ? $"{config.Motherboard.Manufacturer} {config.Motherboard.Name}" : "Nincs kiválasztva";
+                string storageText = config.Storage != null ? $"{config.Storage.CapacityGB}GB {config.Storage.Type}" : "Nincs kiválasztva";
+                string caseText = config.Case != null ? $"{config.Case.Name}" : "Nincs kiválasztva";
+                
+                return new ConfigurationItem
+                {
+                    Id = config.Id,
+                    Name = config.Name ?? "Névtelen konfiguráció",
+                    SaveDate = config.CreatedAt.ToString("yyyy.MM.dd. HH:mm"),
+                    CPU = cpuText,
+                    GPU = gpuText,
+                    RAM = ramText,
+                    Motherboard = mbText,
+                    Storage = storageText,
+                    Case = caseText,
+                    Price = (int)config.Price,
+                    PerformanceScore = config.PerformanceScore
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció konvertálása közben: {ex.Message}");
+                
+                // Hibás konvertálás esetén is visszaadunk egy alapértelmezett konfigurációt
+                return new ConfigurationItem
+                {
+                    Id = config.Id,
+                    Name = config.Name ?? "Hibás konfiguráció",
+                    SaveDate = DateTime.Now.ToString("yyyy.MM.dd. HH:mm"),
+                    CPU = "Hiba történt",
+                    GPU = "Hiba történt",
+                    RAM = "Hiba történt",
+                    Motherboard = "Hiba történt",
+                    Storage = "Hiba történt",
+                    Case = "Hiba történt",
+                    Price = 0,
+                    PerformanceScore = 0
+                };
             }
         }
 
+        // A szűrés funkcionalitás teljesen eltávolítva a felhasználó kérése alapján
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = SearchBox.Text.ToLower();
-            
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                // Ha üres a keresőmező, minden konfigurációt megjelenít
-                _filteredConfigurations.Clear();
-                foreach (var config in _allConfigurations)
-                {
-                    _filteredConfigurations.Add(config);
-                }
-            }
-            else
-            {
-                // Keresés a név, CPU, GPU stb. mezőkben
-                _filteredConfigurations.Clear();
-                var filtered = _allConfigurations.Where(c => 
-                    c.Name.ToLower().Contains(searchText) || 
-                    c.CPU.ToLower().Contains(searchText) || 
-                    c.GPU.ToLower().Contains(searchText) || 
-                    c.RAM.ToLower().Contains(searchText) || 
-                    c.Motherboard.ToLower().Contains(searchText) || 
-                    c.Storage.ToLower().Contains(searchText) || 
-                    c.Case.ToLower().Contains(searchText));
-                
-                foreach (var config in filtered)
-                {
-                    _filteredConfigurations.Add(config);
-                }
-            }
-            
-            UpdateConfigCounter();
-            CheckIfEmpty();
-            RefreshConfigList();
+            // Nem csinálunk semmit, a szűrés ki lett kapcsolva
         }
 
+        // A rendezés funkcionalitás eltávolítva a felhasználó kérése alapján
         private void SortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (SortComboBox.SelectedItem == null) return;
-            
-            ComboBoxItem selectedItem = SortComboBox.SelectedItem as ComboBoxItem;
-            string sortOption = selectedItem?.Content.ToString();
-            
-            switch (sortOption)
-            {
-                case "Legújabb elöl":
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(
-                        _filteredConfigurations.OrderByDescending(c => c.SaveDate));
-                    break;
-                case "Legrégebbi elöl":
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(
-                        _filteredConfigurations.OrderBy(c => c.SaveDate));
-                    break;
-                case "Név szerint (A-Z)":
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(
-                        _filteredConfigurations.OrderBy(c => c.Name));
-                    break;
-                case "Név szerint (Z-A)":
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(
-                        _filteredConfigurations.OrderByDescending(c => c.Name));
-                    break;
-                case "Ár szerint (növekvő)":
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(
-                        _filteredConfigurations.OrderBy(c => c.Price));
-                    break;
-                case "Ár szerint (csökkenő)":
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(
-                        _filteredConfigurations.OrderByDescending(c => c.Price));
-                    break;
-            }
-            
-            RefreshConfigList();
+            // Nem csinálunk semmit, a rendezés ki lett kapcsolva
         }
 
         private void RefreshConfigList()
         {
-            // Dinamikusan renderjük újra a konfigurációkat az ItemsControl-ban
-            ConfigList.Items.Clear();
-
-            foreach (var config in _filteredConfigurations)
+            try
             {
-                // Létrehozzuk a konfiguráció kártyát
+                // Ellenőrizzük, hogy a ConfigList nem null
+                if (ConfigList == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("ConfigList kontroll null a RefreshConfigList metódusban!");
+                    return;
+                }
+                
+                // Tisztítsuk a listát
+                ConfigList.Items.Clear();
+                
+                // Biztosítsuk, hogy a gyűjtemény ne legyen null
+                if (_allConfigurations == null)
+                {
+                    _allConfigurations = new ObservableCollection<ConfigurationItem>();
+                }
+                
+                // Mivel a szűrés teljesen eltávolításra került, csak az _allConfigurations-t használjuk
+                
+                // Frissítsük a számlálót és az üres állapotot
+                UpdateConfigCounter();
+                CheckIfEmpty();
+                
+                // Ha nincs elem, kilépünk
+                if (_allConfigurations.Count == 0)
+                {
+                    return;
+                }
+                
+                // Végigmegyünk az elemeken és létrehozzuk a UI elemeket - csak az _allConfigurations-t használjuk
+                foreach (var config in _allConfigurations)
+                {
+                // Létrehozzuk a konfiguráció kártyát - még nagyobb mérettel
                 Border configBorder = new Border
                 {
                     Style = (Style)Resources["ConfigItem"],
-                    Tag = config.Id
+                    Tag = config.Id,
+                    Margin = new Thickness(20, 0, 20, 40), // Jelentősen növeljük a margókat minden oldalon
+                    HorizontalAlignment = HorizontalAlignment.Stretch,  // Teljes szélességet használjuk
+                    VerticalAlignment = VerticalAlignment.Stretch,      // Teljes magasságot használjuk
+                    MinHeight = 350 // Minimális magasság
                 };
-                configBorder.MouseUp += ConfigItem_Click;                // A Border-nek adjuk a padding-ot
-                configBorder.Padding = new Thickness(20);
+                configBorder.MouseUp += ConfigItem_Click;
+                // Jóval nagyobb padding a tartalom körül
+                configBorder.Padding = new Thickness(50, 40, 50, 40);
                 
                 // A belső Grid létrehozása
                 Grid mainGrid = new Grid();
@@ -232,16 +391,17 @@ namespace PC_Configurator.Views.App
                 TextBlock nameBlock = new TextBlock
                 {
                     Text = config.Name,
-                    FontSize = 18,
+                    FontSize = 24,  // Nagyobb betűméret
                     FontWeight = FontWeights.Bold,
-                    Foreground = Brushes.White
+                    Foreground = Brushes.White,
+                    Margin = new Thickness(0, 0, 0, 8)  // Több hely alul
                 };
                 TextBlock dateBlock = new TextBlock
                 {
                     Text = $"Mentve: {config.SaveDate}",
-                    FontSize = 12,
+                    FontSize = 16,  // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#999999"),
-                    Margin = new Thickness(0, 4, 0, 0)
+                    Margin = new Thickness(0, 0, 0, 10)  // Több hely alul
                 };
                 headerLeft.Children.Add(nameBlock);
                 headerLeft.Children.Add(dateBlock);
@@ -259,21 +419,23 @@ namespace PC_Configurator.Views.App
                 {
                     Text = "\uE70F", // Szerkesztés ikon
                     FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                    FontSize = 14
+                    FontSize = 20 // Nagyobb ikon méret
                 };
                 editButton.Content = editIcon;
+                editButton.Padding = new Thickness(12); // Nagyobb padding a gombnak
                 
                 Button deleteButton = new Button
                 {
                     Style = (Style)Resources["DeleteButton"],
-                    Tag = config.Id
+                    Tag = config.Id,
+                    Padding = new Thickness(12) // Nagyobb padding a gombnak
                 };
                 deleteButton.Click += DeleteConfig_Click;
                 TextBlock deleteIcon = new TextBlock
                 {
                     Text = "\uE74D", // Törlés ikon
                     FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                    FontSize = 14
+                    FontSize = 20 // Nagyobb ikon méret
                 };
                 deleteButton.Content = deleteIcon;
                 
@@ -296,23 +458,23 @@ namespace PC_Configurator.Views.App
                 TextBlock cpuBlock = new TextBlock
                 {
                     Text = $"CPU: {config.CPU}",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
-                    Margin = new Thickness(0, 0, 0, 6)
+                    Margin = new Thickness(0, 0, 0, 12) // Nagyobb térköz
                 };
                 TextBlock gpuBlock = new TextBlock
                 {
                     Text = $"GPU: {config.GPU}",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
-                    Margin = new Thickness(0, 0, 0, 6)
+                    Margin = new Thickness(0, 0, 0, 12) // Nagyobb térköz
                 };
                 TextBlock ramBlock = new TextBlock
                 {
                     Text = $"RAM: {config.RAM}",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
-                    Margin = new Thickness(0, 0, 0, 6)
+                    Margin = new Thickness(0, 0, 0, 12) // Nagyobb térköz
                 };
                 leftComponents.Children.Add(cpuBlock);
                 leftComponents.Children.Add(gpuBlock);
@@ -324,23 +486,23 @@ namespace PC_Configurator.Views.App
                 TextBlock motherboardBlock = new TextBlock
                 {
                     Text = $"Alaplap: {config.Motherboard}",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
-                    Margin = new Thickness(0, 0, 0, 6)
+                    Margin = new Thickness(0, 0, 0, 12) // Nagyobb térköz
                 };
                 TextBlock storageBlock = new TextBlock
                 {
                     Text = $"Tárhely: {config.Storage}",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
-                    Margin = new Thickness(0, 0, 0, 6)
+                    Margin = new Thickness(0, 0, 0, 12) // Nagyobb térköz
                 };
                 TextBlock caseBlock = new TextBlock
                 {
                     Text = $"Ház: {config.Case}",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
-                    Margin = new Thickness(0, 0, 0, 6)
+                    Margin = new Thickness(0, 0, 0, 12) // Nagyobb térköz
                 };
                 middleComponents.Children.Add(motherboardBlock);
                 middleComponents.Children.Add(storageBlock);
@@ -352,13 +514,13 @@ namespace PC_Configurator.Views.App
                 Border priceBorder = new Border
                 {
                     Background = (SolidColorBrush)new BrushConverter().ConvertFrom("#0D66D0"),
-                    CornerRadius = new CornerRadius(6),
-                    Padding = new Thickness(16, 8, 16, 8)
+                    CornerRadius = new CornerRadius(8), // Kicsit nagyobb lekerekítés
+                    Padding = new Thickness(24, 12, 24, 12) // Nagyobb padding
                 };
                 TextBlock priceBlock = new TextBlock
                 {
                     Text = $"{config.Price:N0} Ft",
-                    FontSize = 18,
+                    FontSize = 24, // Nagyobb betűméret
                     FontWeight = FontWeights.Bold,
                     Foreground = Brushes.White
                 };
@@ -379,10 +541,10 @@ namespace PC_Configurator.Views.App
                 TextBlock perfLabelBlock = new TextBlock
                 {
                     Text = "Teljesítmény:",
-                    FontSize = 14,
+                    FontSize = 18, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#999999"),
                     VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 8, 0)
+                    Margin = new Thickness(0, 10, 12, 0) // Nagyobb térköz
                 };
                 Grid.SetColumn(perfLabelBlock, 0);
 
@@ -391,17 +553,17 @@ namespace PC_Configurator.Views.App
                 {
                     Value = config.PerformanceScore,
                     Maximum = 100,
-                    Height = 8,
+                    Height = 12, // Magasabb progress bar
                     Background = (SolidColorBrush)new BrushConverter().ConvertFrom("#333333"),
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#0D66D0")
                 };
                 TextBlock scoreBlock = new TextBlock
                 {
                     Text = $"{config.PerformanceScore}/100",
-                    FontSize = 12,
+                    FontSize = 16, // Nagyobb betűméret
                     Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#CCCCCC"),
                     HorizontalAlignment = HorizontalAlignment.Right,
-                    Margin = new Thickness(0, 12, 0, 0)
+                    Margin = new Thickness(0, 16, 0, 0) // Nagyobb térköz
                 };
                 progressGrid.Children.Add(progressBar);
                 progressGrid.Children.Add(scoreBlock);
@@ -418,6 +580,12 @@ namespace PC_Configurator.Views.App
 
                 configBorder.Child = mainGrid;
                 ConfigList.Items.Add(configBorder);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció lista frissítésekor: {ex.Message}");
+                MessageBox.Show($"Hiba történt a konfiguráció lista frissítése közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -426,10 +594,43 @@ namespace PC_Configurator.Views.App
             if (sender is Border border)
             {
                 int configId = (int)border.Tag;
-                MessageBox.Show($"A {configId} azonosítójú konfigurációt részletei megnyitva", "Konfiguráció megnyitása", MessageBoxButton.OK, MessageBoxImage.Information);
                 
-                // Itt nyithatnánk meg a konfiguráció részleteit vagy szerkesztését
-                // Átirányítás a ConfigBuilder oldalra, a konfiguráció ID-jával
+                try
+                {
+                    // A vw_FullConfigurations nézetből már betöltöttük a konfigurációt és komponenseit
+                    // így egyből megnyithatjuk, vagy újratölthetjük ha biztosak akarunk lenni az aktuális adatokban
+                    
+                    // Opcionálisan: Konfiguráció frissítése az adatbázisból a legfrissebb adatokkal
+                    var config = ConfigurationModel.LoadFromDatabase(configId);
+                    
+                    if (config != null)
+                    {
+                        // ConfigBuilder oldal megnyitása a konfiguráció részleteivel
+                        var configBuilder = new ConfigBuilder();
+                        configBuilder.LoadConfiguration(config);
+                        
+                        // A főablak megkeresése
+                        var dashboard = Window.GetWindow(this) as Dashboard;
+                        if (dashboard != null)
+                        {
+                            // A tartalmi terület frissítése a ConfigBuilder-rel
+                            dashboard.MainContentArea.Content = configBuilder;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Nem sikerült megtalálni a főablakot.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show($"A {configId} azonosítójú konfiguráció nem található.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció megnyitása közben: {ex.Message}");
+                    MessageBox.Show($"Hiba történt a konfiguráció megnyitása közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -441,10 +642,40 @@ namespace PC_Configurator.Views.App
             // Az esemény terjedésének megakadályozása, hogy ne nyíljon meg a konfiguráció részletei is
             e.Handled = true;
             
-            MessageBox.Show($"A {configId} azonosítójú konfiguráció szerkesztése", "Szerkesztés", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // Itt nyithatnánk meg a konfiguráció szerkesztését
-            // Átirányítás a ConfigBuilder oldalra, szerkesztési módban, a konfiguráció ID-jával
+            try
+            {
+                // A vw_FullConfigurations nézetből már betöltöttük a konfigurációt és komponenseit
+                // így egyből megnyithatnánk szerkesztésre, de a szerkesztéshez célszerű frissíteni az adatokat
+                var config = ConfigurationModel.LoadFromDatabase(configId);
+                
+                if (config != null)
+                {
+                    // ConfigBuilder oldal megnyitása szerkesztési módban
+                    var configBuilder = new ConfigBuilder();
+                    configBuilder.LoadConfiguration(config);
+                    
+                    // A főablak megkeresése
+                    var dashboard = Window.GetWindow(this) as Dashboard;
+                    if (dashboard != null)
+                    {
+                        // A tartalmi terület frissítése a ConfigBuilder-rel
+                        dashboard.MainContentArea.Content = configBuilder;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Nem sikerült megtalálni a főablakot.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show($"A {configId} azonosítójú konfiguráció nem található.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció szerkesztése közben: {ex.Message}");
+                MessageBox.Show($"Hiba történt a konfiguráció szerkesztése közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DeleteConfig_Click(object sender, RoutedEventArgs e)
@@ -463,35 +694,78 @@ namespace PC_Configurator.Views.App
             
             if (result == MessageBoxResult.Yes)
             {
-                // Konfiguráció törlése
-                var configToRemove = _allConfigurations.FirstOrDefault(c => c.Id == configId);
-                if (configToRemove != null)
+                try
                 {
-                    _allConfigurations.Remove(configToRemove);
-                    _filteredConfigurations = new ObservableCollection<ConfigurationItem>(_allConfigurations);
+                    // Konfiguráció törlése az adatbázisból
+                    bool deleteSuccessful = ConfigurationModel.DeleteFromDatabase(configId);
                     
-                    // Lista frissítése
-                    UpdateConfigCounter();
-                    CheckIfEmpty();
-                    RefreshConfigList();
-                    
-                    MessageBox.Show("A konfiguráció sikeresen törölve!", "Sikeres törlés", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (deleteSuccessful)
+                    {
+                        // Konfiguráció törlése a listából
+                        if (_allConfigurations != null)
+                        {
+                            var configToRemove = _allConfigurations.FirstOrDefault(c => c.Id == configId);
+                            if (configToRemove != null)
+                            {
+                                _allConfigurations.Remove(configToRemove);
+                                
+                                // A szűrési funkció el lett távolítva
+                                
+                                // Lista frissítése
+                                UpdateConfigCounter();
+                                CheckIfEmpty();
+                                RefreshConfigList();
+                                
+                                MessageBox.Show("A konfiguráció sikeresen törölve!", "Sikeres törlés", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                        }
+                        else
+                        {
+                            // Ha valami miatt _allConfigurations null lenne
+                            MessageBox.Show("A konfigurációkat nem sikerült betölteni. Kérjük frissítsd az oldalt.", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            _allConfigurations = new ObservableCollection<ConfigurationItem>();
+                            
+                            // Újratöltjük az adatokat
+                            LoadConfigurationsFromDatabase();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Nem sikerült törölni a konfigurációt az adatbázisból.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció törlése közben: {ex.Message}");
+                    MessageBox.Show($"Hiba történt a konfiguráció törlése közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
         private void NewConfig_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Új konfiguráció készítése", "Új konfiguráció", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // Itt nyithatnánk meg a ConfigBuilder oldalt új konfiguráció készítésére
-            // Például:
-            // var configBuilder = new ConfigBuilder();
-            // MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-            // if (mainWindow != null)
-            // {
-            //     mainWindow.MainContent.Content = configBuilder;
-            // }
+            try
+            {
+                // ConfigBuilder oldal megnyitása
+                var configBuilder = new ConfigBuilder();
+                    
+                // A főablak megkeresése
+                var dashboard = Window.GetWindow(this) as Dashboard;
+                if (dashboard != null)
+                {
+                    // A tartalmi terület frissítése a ConfigBuilder-rel
+                    dashboard.MainContentArea.Content = configBuilder;
+                }
+                else
+                {
+                    MessageBox.Show("Nem sikerült megtalálni a főablakot.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az új konfiguráció létrehozása közben: {ex.Message}");
+                MessageBox.Show($"Hiba történt az új konfiguráció létrehozása közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

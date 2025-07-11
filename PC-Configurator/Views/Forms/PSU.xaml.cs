@@ -211,16 +211,14 @@ namespace PC_Configurator.Views.Forms
                 {
                     model.Id = _editId;  // ID beállítása szerkesztés esetén
                     model.UpdateInDatabase();
-                    MessageBox.Show("Tápegység sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
                     model.SaveToDatabase();
-                    MessageBox.Show("Tápegység sikeresen hozzáadva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-
-                // Form bezárásának kérése
-                OnCloseRequest();
+                
+                // Értesítjük a szülő ablakot a sikeres mentésről
+                SaveCompleted?.Invoke(this, EventArgs.Empty);
                 
                 // Mezők törlése
                 NameTextBox.Text = string.Empty;
@@ -235,6 +233,9 @@ namespace PC_Configurator.Views.Forms
                 
                 // Hibaüzenetek elrejtése
                 ValidationHelper.ClearErrors(NameError, WattageError, EfficiencyError, PriceError);
+
+                // Esemény kiváltása a sikeres mentés jelzésére
+                SaveCompleted?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -255,13 +256,7 @@ namespace PC_Configurator.Views.Forms
             }
         }
 
-        // Esemény a form bezárásához
-        public event EventHandler CloseRequest;
-
-        // Metódus az esemény kiváltásához
-        protected virtual void OnCloseRequest()
-        {
-            CloseRequest?.Invoke(this, EventArgs.Empty);
-        }
+        // Esemény a sikeres mentés jelzéséhez
+        public event EventHandler SaveCompleted;
     }
 }

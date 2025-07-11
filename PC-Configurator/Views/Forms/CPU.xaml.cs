@@ -21,6 +21,9 @@ namespace PC_Configurator.Views.Forms
     /// </summary>
     public partial class CPU : UserControl
     {
+        // Esemény a sikeres mentés jelzésére
+        public event EventHandler SaveCompleted;
+
         public CPU()
         {
             InitializeComponent();
@@ -30,7 +33,11 @@ namespace PC_Configurator.Views.Forms
             NameTextBox.LostFocus += (s, e) => ValidateName();
             NameTextBox.TextChanged += (s, e) => ValidateName();
             
-            ManufacturerComboBox.SelectionChanged += (s, e) => ValidateManufacturer();
+            ManufacturerComboBox.SelectionChanged += (s, e) => 
+            {
+                ValidateManufacturer(); 
+                LoadSocketsByManufacturer((ManufacturerComboBox.SelectedItem as ComboBoxItem)?.Content.ToString());
+            };
             CoresComboBox.SelectionChanged += (s, e) => ValidateCores();
             ThreadsComboBox.SelectionChanged += (s, e) => ValidateThreads();
             
@@ -58,6 +65,7 @@ namespace PC_Configurator.Views.Forms
                 bool isThreadsValid = ValidateThreads();
                 bool isBaseClockValid = ValidateBaseClock();
                 bool isBoostClockValid = ValidateBoostClock();
+                bool isSocketValid = ValidateSocket();
                 bool isPriceValid = ValidatePrice();
                 bool isPowerConsumptionValid = ValidatePowerConsumption();
 
@@ -65,7 +73,7 @@ namespace PC_Configurator.Views.Forms
                 if (!ValidationHelper.ValidateForm(
                     isNameValid, isManufacturerValid, isCoresValid,
                     isThreadsValid, isBaseClockValid, isBoostClockValid,
-                    isPriceValid, isPowerConsumptionValid))
+                    isSocketValid, isPriceValid, isPowerConsumptionValid))
                 {
                     return;
                 }
@@ -75,6 +83,7 @@ namespace PC_Configurator.Views.Forms
                 string manufacturer = (ManufacturerComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
                 int cores = int.Parse((CoresComboBox.SelectedItem as ComboBoxItem)?.Content.ToString());
                 int threads = int.Parse((ThreadsComboBox.SelectedItem as ComboBoxItem)?.Content.ToString());
+                string socket = (SocketComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
                 
                 // Számok konvertálása kulturától függetlenül
                 float baseClock = (float)double.Parse(
@@ -109,12 +118,17 @@ namespace PC_Configurator.Views.Forms
                     );
                 }
 
+                var selectedSocketItem = SocketComboBox.SelectedItem as ComboBoxItem;
+                var socketTypeId = selectedSocketItem?.Tag as int?;
+                socket = selectedSocketItem?.Content.ToString();
+
                 // Az objektum létrehozása
                 var model = new PC_Configurator.Models.CPU 
                 { 
                     Name = name, 
-                    Manufacturer = manufacturer, 
-                    Socket = SocketTextBox.Text.Trim(),  // Socket hozzáadása
+                    Manufacturer = manufacturer,
+                    SocketTypeId = socketTypeId ?? 0,
+                    Socket = socket,
                     Cores = cores, 
                     Threads = threads, 
                     BaseClockGHz = baseClock, 
@@ -133,8 +147,8 @@ namespace PC_Configurator.Views.Forms
                     SaveChangesToDatabase(model);
                     MessageBox.Show("CPU sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                     
-                    // Az ablak bezárása, ha szerkesztési módban vagyunk
-                    Window.GetWindow(this)?.Close();
+                    // Jelezzük a sikeres mentést az esemény kiváltásával
+                    SaveCompleted?.Invoke(this, EventArgs.Empty);
                 }
                 else
                 {
@@ -145,6 +159,9 @@ namespace PC_Configurator.Views.Forms
                     // Űrlap törlése új hozzáadás esetén
                     ResetForm();
                 }
+
+                // SaveCompleted esemény kiváltása
+                SaveCompleted?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -159,11 +176,12 @@ namespace PC_Configurator.Views.Forms
             {
                 conn.Open();
                 var command = new System.Data.SqlClient.SqlCommand(
-                    "INSERT INTO CPUs (Name, Manufacturer, Socket, Cores, Threads, BaseClockGHz, BoostClockGHz, Price, PowerConsumption) " +
-                    "VALUES (@Name, @Manufacturer, @Socket, @Cores, @Threads, @BaseClockGHz, @BoostClockGHz, @Price, @PowerConsumption)", conn);
+                    "INSERT INTO CPUs (Name, Manufacturer, SocketTypeId, Socket, Cores, Threads, BaseClockGHz, BoostClockGHz, Price, PowerConsumption) " +
+                    "VALUES (@Name, @Manufacturer, @SocketTypeId, @Socket, @Cores, @Threads, @BaseClockGHz, @BoostClockGHz, @Price, @PowerConsumption)", conn);
                 
                 command.Parameters.AddWithValue("@Name", cpu.Name);
                 command.Parameters.AddWithValue("@Manufacturer", cpu.Manufacturer);
+                command.Parameters.AddWithValue("@SocketTypeId", cpu.SocketTypeId);
                 command.Parameters.AddWithValue("@Socket", string.IsNullOrEmpty(cpu.Socket) ? DBNull.Value : (object)cpu.Socket);
                 command.Parameters.AddWithValue("@Cores", cpu.Cores);
                 command.Parameters.AddWithValue("@Threads", cpu.Threads);
@@ -183,7 +201,7 @@ namespace PC_Configurator.Views.Forms
             {
                 conn.Open();
                 var command = new System.Data.SqlClient.SqlCommand(
-                    "UPDATE CPUs SET Name = @Name, Manufacturer = @Manufacturer, Socket = @Socket, " +
+                    "UPDATE CPUs SET Name = @Name, Manufacturer = @Manufacturer, SocketTypeId = @SocketTypeId, Socket = @Socket, " +
                     "Cores = @Cores, Threads = @Threads, BaseClockGHz = @BaseClockGHz, " +
                     "BoostClockGHz = @BoostClockGHz, Price = @Price, PowerConsumption = @PowerConsumption " +
                     "WHERE Id = @Id", conn);
@@ -191,6 +209,7 @@ namespace PC_Configurator.Views.Forms
                 command.Parameters.AddWithValue("@Id", cpu.Id);
                 command.Parameters.AddWithValue("@Name", cpu.Name);
                 command.Parameters.AddWithValue("@Manufacturer", cpu.Manufacturer);
+                command.Parameters.AddWithValue("@SocketTypeId", cpu.SocketTypeId);
                 command.Parameters.AddWithValue("@Socket", string.IsNullOrEmpty(cpu.Socket) ? DBNull.Value : (object)cpu.Socket);
                 command.Parameters.AddWithValue("@Cores", cpu.Cores);
                 command.Parameters.AddWithValue("@Threads", cpu.Threads);
@@ -208,7 +227,7 @@ namespace PC_Configurator.Views.Forms
             // Űrlap törlése
             NameTextBox.Text = string.Empty;
             ManufacturerComboBox.SelectedIndex = 0;
-            SocketTextBox.Text = string.Empty;
+            SocketComboBox.SelectedIndex = 0;
             CoresComboBox.SelectedIndex = 0;
             ThreadsComboBox.SelectedIndex = 0;
             BaseClockTextBox.Text = string.Empty;
@@ -272,10 +291,21 @@ namespace PC_Configurator.Views.Forms
                                 BaseClockTextBox.Text = reader["BaseClockGHz"].ToString().Replace(',', '.');
                                 BoostClockTextBox.Text = reader["BoostClockGHz"].ToString().Replace(',', '.');
                                 
-                                // Socket (ha van)
-                                if (reader["Socket"] != DBNull.Value)
+                                // Először betöltjük a socketeket a gyártó alapján
+                                LoadSocketsByManufacturer(manufacturer);
+                                
+                                // Socket kiválasztása (ha van)
+                                if (reader["SocketTypeId"] != DBNull.Value)
                                 {
-                                    SocketTextBox.Text = reader["Socket"].ToString();
+                                    int socketTypeId = Convert.ToInt32(reader["SocketTypeId"]);
+                                    foreach (ComboBoxItem item in SocketComboBox.Items)
+                                    {
+                                        if (item.Tag != null && (int)item.Tag == socketTypeId)
+                                        {
+                                            SocketComboBox.SelectedItem = item;
+                                            break;
+                                        }
+                                    }
                                 }
                                 
                                 // Ár (ha van)
@@ -439,6 +469,91 @@ namespace PC_Configurator.Views.Forms
             
             ValidationHelper.ClearErrors(PowerConsumptionErrorBlock);
             return true;
+        }
+
+        private void LoadSocketsByManufacturer(string manufacturer)
+        {
+            try
+            {
+                SocketComboBox.Items.Clear();
+
+                // Alapértelmezett "Válasszon..." elem hozzáadása
+                var defaultItem = new ComboBoxItem
+                {
+                    Content = "Válasszon...",
+                    Foreground = Brushes.White,
+                    Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E"))
+                };
+                SocketComboBox.Items.Add(defaultItem);
+                SocketComboBox.SelectedItem = defaultItem;
+
+                // Ha nincs kiválasztva gyártó, nem töltünk be socketeket
+                if (string.IsNullOrEmpty(manufacturer) || manufacturer == "Válasszon...")
+                    return;
+
+                // Socketek betöltése az adatbázisból
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string query = @"
+                    SELECT Id, SocketName, Generation 
+                    FROM SocketTypes 
+                    WHERE Manufacturer = @Manufacturer 
+                    ORDER BY 
+                        CASE 
+                            WHEN Generation IS NULL THEN 1 
+                            ELSE 0 
+                        END,
+                        Generation DESC,
+                        SocketName";
+
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Manufacturer", manufacturer);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string socketName = reader["SocketName"].ToString();
+                                string generation = reader["Generation"]?.ToString();
+                                string displayText = !string.IsNullOrEmpty(generation) 
+                                    ? $"{socketName} ({generation})" 
+                                    : socketName;
+
+                                var item = new ComboBoxItem
+                                {
+                                    Content = socketName, // Az eredeti SocketName értéket tároljuk
+                                    Tag = reader["Id"],   // Az ID-t a Tag tulajdonságban tároljuk
+                                    Foreground = Brushes.White,
+                                    Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E"))
+                                };
+
+                                // A megjelenített szöveg tartalmazza a generációt is, ha van
+                                if (!string.IsNullOrEmpty(generation))
+                                {
+                                    item.Content = displayText;
+                                }
+
+                                SocketComboBox.Items.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleDatabaseError(ex, "betöltés", "socket típusok");
+            }
+        }
+        
+        private bool ValidateSocket()
+        {
+            return ValidationHelper.ValidateComboBoxSelection(
+                SocketComboBox,
+                SocketErrorBlock,
+                "Foglalat"
+            );
         }
     }
 }

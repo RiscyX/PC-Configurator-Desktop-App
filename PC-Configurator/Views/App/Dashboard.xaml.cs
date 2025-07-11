@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,8 +44,8 @@ namespace PC_Configurator.Views.App
             // Create menu items based on user role
             AddMenuItems(userRole);
             
-            // Set Profile as the default page and update the page title
-            SetActivePage(typeof(PC_Configurator.Views.App.Profile));
+            // Set Configs as the default page instead of Profile (which was removed)
+            SetActivePage(typeof(PC_Configurator.Views.App.Configs));
         }
         
         // Initialize page icons and titles dictionary
@@ -84,7 +85,7 @@ namespace PC_Configurator.Views.App
             SidebarMenu.Children.Add(CreateNavButton("Alkatrészek", typeof(PC_Configurator.Views.App.Components), "\uE7F4"));
             SidebarMenu.Children.Add(CreateNavButton("Gépépítés", typeof(PC_Configurator.Views.App.ConfigBuilder), "\uE90F"));
             SidebarMenu.Children.Add(CreateNavButton("Konfigurációk", typeof(PC_Configurator.Views.App.Configs), "\uE8B7"));
-            SidebarMenu.Children.Add(CreateNavButton("Fiókom", typeof(PC_Configurator.Views.App.Profile), "\uE77B"));
+            // A "Fiókom" menüpont el lett távolítva a felhasználó kérésére
             
             // Admin-only menu items
             bool isAdmin = userRole.ToLower() == "admin" || PermissionManager.IsCurrentUserAdmin();
@@ -96,8 +97,7 @@ namespace PC_Configurator.Views.App
                 AddCategoryLabel("Adminisztráció");
                 
                 SidebarMenu.Children.Add(CreateNavButton("Alkatrészek hozzáadása", typeof(PC_Configurator.Views.App.AddComponents), "\uE710"));
-                SidebarMenu.Children.Add(CreateNavButton("Rendszergazdai beállítások", typeof(PC_Configurator.Views.App.AdminSettings), "\uE713"));
-                SidebarMenu.Children.Add(CreateNavButton("Felhasználók kezelése", typeof(PC_Configurator.Views.App.Users), "\uE716"));
+                // Rendszergazdai beállítások és felhasználó kezelés el lett távolítva a felhasználó kérésére
             }
 
             // Add bottom section with separator
@@ -174,31 +174,39 @@ namespace PC_Configurator.Views.App
                 
                 // Admin oldalak ellenőrzése navigáció előtt
                 bool isAdminPage = 
-                    userControlType == typeof(PC_Configurator.Views.App.AddComponents) ||
-                    userControlType == typeof(PC_Configurator.Views.App.AdminSettings) ||
-                    userControlType == typeof(PC_Configurator.Views.App.Users);
+                    userControlType == typeof(PC_Configurator.Views.App.AddComponents); 
+                // AdminSettings és Users oldalak el lettek távolítva a menüből a felhasználó kérésére
                 
                 bool isAdmin = UserRole.ToLower() == "admin" || PermissionManager.IsCurrentUserAdmin();
                 Console.WriteLine($"Navigation check: IsAdminPage={isAdminPage}, UserRole={UserRole}, IsAdmin={isAdmin}");
                 
-                // Ha admin oldalt próbálunk megnyitni, de nincs jogosultság, átirányítunk a Profil oldalra
+                // Ha admin oldalt próbálunk megnyitni, de nincs jogosultság, átirányítunk a Konfigurációk oldalra
                 if (isAdminPage && !isAdmin)
                 {
-                    Console.WriteLine("Access denied to admin page, redirecting to Profile");
+                    Console.WriteLine("Access denied to admin page, redirecting to Configs");
                     MessageBox.Show(
                         "Nincs jogosultsága ehhez az oldalhoz! Ez az oldal csak rendszergazdák számára érhető el.",
                         "Hozzáférés megtagadva",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     
-                    userControlType = typeof(PC_Configurator.Views.App.Profile);
+                    userControlType = typeof(PC_Configurator.Views.App.Configs);
+                }
+                
+                // Ha a Profile oldalt próbáljuk megnyitni, irányítsuk át a Konfigurációk oldalra
+                if (userControlType == typeof(PC_Configurator.Views.App.Profile))
+                {
+                    userControlType = typeof(PC_Configurator.Views.App.Configs);
                 }
                 
                 // Create appropriate instance based on type
                 object control = null;
-                if (userControlType == typeof(PC_Configurator.Views.App.Profile))
+                if (userControlType == typeof(PC_Configurator.Views.App.ConfigBuilder))
                 {
-                    control = new PC_Configurator.Views.App.Profile(UserEmail, UserRole);
+                    // Lekérdezzük a felhasználó ID-t az adatbázisból
+                    int userId = GetUserIdFromEmail(UserEmail);
+                    System.Diagnostics.Debug.WriteLine($"ConfigBuilder létrehozása UserId={userId} értékkel");
+                    control = new PC_Configurator.Views.App.ConfigBuilder(userId);
                 }
                 else
                 {
@@ -232,7 +240,42 @@ namespace PC_Configurator.Views.App
             {
                 MessageBox.Show($"Hiba történt az oldal betöltése közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }        private void UpdateActiveButton(Type userControlType)
+        }        // Felhasználói azonosító lekérdezése email alapján
+        private int GetUserIdFromEmail(string email)
+        {
+            try
+            {
+                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand("SELECT Id FROM Users WHERE Email = @Email", connection))
+                    {
+                        command.Parameters.AddWithValue("@Email", email);
+                        var result = command.ExecuteScalar();
+                        
+                        if (result != null && result != DBNull.Value)
+                        {
+                            int userId = Convert.ToInt32(result);
+                            System.Diagnostics.Debug.WriteLine($"Felhasználó ID lekérdezve: {userId} a(z) {email} e-mail címhez");
+                            return userId;
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Nem található felhasználó a(z) {email} e-mail címmel");
+                            return 0;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a felhasználói ID lekérdezése közben: {ex.Message}");
+                return 0;
+            }
+        }
+        
+        private void UpdateActiveButton(Type userControlType)
         {
             // Reset all buttons to default style
             foreach (var child in SidebarMenu.Children)

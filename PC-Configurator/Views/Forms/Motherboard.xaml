@@ -113,13 +113,8 @@
                 <TextBlock Text="Gyártó" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
                 <ComboBox x:Name="ManufacturerComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5" SelectionChanged="ManufacturerComboBox_SelectionChanged">
                     <ComboBoxItem Content="Válasszon..." Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="ASUS" Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="ASRock" Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="Gigabyte" Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="MSI" Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="Biostar" Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="Supermicro" Foreground="White" Background="#1E1E1E"/>
-                    <ComboBoxItem Content="EVGA" Foreground="White" Background="#1E1E1E"/>
+                    <ComboBoxItem Content="AMD" Foreground="White" Background="#1E1E1E"/>
+                    <ComboBoxItem Content="Intel" Foreground="White" Background="#1E1E1E"/>
                 </ComboBox>
                 <TextBlock x:Name="ManufacturerErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 <TextBlock Text="Chipkészlet" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>

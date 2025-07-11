@@ -16,7 +16,7 @@ namespace PC_Configurator.Models
         public float BaseClockGHz { get; set; }
         public float BoostClockGHz { get; set; }
         public int SocketTypeId { get; set; }
-        public string Socket { get; set; }
+        public string Socket { get; set; }  // Ezt megtartjuk kompatibilitás miatt
         public decimal Price { get; set; }
         public int PowerConsumption { get; set; }
 
@@ -39,8 +39,8 @@ namespace PC_Configurator.Models
             {
                 connection.Open();
                 using (var command = new System.Data.SqlClient.SqlCommand(
-                    "INSERT INTO CPUs (Name, Manufacturer, Cores, Threads, BaseClockGHz, BoostClockGHz, Socket, Price, PowerConsumption) " +
-                    "VALUES (@Name, @Manufacturer, @Cores, @Threads, @BaseClockGHz, @BoostClockGHz, @Socket, @Price, @PowerConsumption)", connection))
+                    "INSERT INTO CPUs (Name, Manufacturer, Cores, Threads, BaseClockGHz, BoostClockGHz, SocketTypeId, Socket, Price, PowerConsumption) " +
+                    "VALUES (@Name, @Manufacturer, @Cores, @Threads, @BaseClockGHz, @BoostClockGHz, @SocketTypeId, @Socket, @Price, @PowerConsumption)", connection))
                 {
                     command.Parameters.AddWithValue("@Name", Name);
                     command.Parameters.AddWithValue("@Manufacturer", Manufacturer);
@@ -48,6 +48,7 @@ namespace PC_Configurator.Models
                     command.Parameters.AddWithValue("@Threads", Threads);
                     command.Parameters.AddWithValue("@BaseClockGHz", BaseClockGHz);
                     command.Parameters.AddWithValue("@BoostClockGHz", BoostClockGHz);
+                    command.Parameters.AddWithValue("@SocketTypeId", SocketTypeId);
                     command.Parameters.AddWithValue("@Socket", Socket ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Price", Price > 0 ? (object)Price : DBNull.Value);
                     command.Parameters.AddWithValue("@PowerConsumption", PowerConsumption > 0 ? (object)PowerConsumption : DBNull.Value);
@@ -65,7 +66,7 @@ namespace PC_Configurator.Models
                 using (var command = new System.Data.SqlClient.SqlCommand(
                     "UPDATE CPUs SET Name = @Name, Manufacturer = @Manufacturer, Cores = @Cores, " +
                     "Threads = @Threads, BaseClockGHz = @BaseClockGHz, BoostClockGHz = @BoostClockGHz, " +
-                    "Socket = @Socket, Price = @Price, PowerConsumption = @PowerConsumption " +
+                    "SocketTypeId = @SocketTypeId, Socket = @Socket, Price = @Price, PowerConsumption = @PowerConsumption " +
                     "WHERE Id = @Id", connection))
                 {
                     command.Parameters.AddWithValue("@Id", Id);
@@ -75,6 +76,7 @@ namespace PC_Configurator.Models
                     command.Parameters.AddWithValue("@Threads", Threads);
                     command.Parameters.AddWithValue("@BaseClockGHz", BaseClockGHz);
                     command.Parameters.AddWithValue("@BoostClockGHz", BoostClockGHz);
+                    command.Parameters.AddWithValue("@SocketTypeId", SocketTypeId);
                     command.Parameters.AddWithValue("@Socket", Socket ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Price", Price > 0 ? (object)Price : DBNull.Value);
                     command.Parameters.AddWithValue("@PowerConsumption", PowerConsumption > 0 ? (object)PowerConsumption : DBNull.Value);

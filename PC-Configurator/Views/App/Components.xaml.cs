@@ -13,7 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel; // DependencyPropertyDescriptor-hoz
-using PC_Configurator.Helpers; // PermissionManager és ErrorHandler használatához
+using PC_Configurator.Helpers;
+using PC_Configurator.Models; // PermissionManager és ErrorHandler használatához
 
 namespace PC_Configurator.Views.App
 {
@@ -375,7 +376,10 @@ namespace PC_Configurator.Views.App
             using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
             {
                 conn.Open();
-                using (var cmd = new System.Data.SqlClient.SqlCommand("SELECT * FROM CPUs", conn))
+                using (var cmd = new System.Data.SqlClient.SqlCommand(@"
+                    SELECT c.*, s.SocketName, s.Generation 
+                    FROM CPUs c 
+                    LEFT JOIN SocketTypes s ON c.SocketTypeId = s.Id", conn))
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -384,7 +388,7 @@ namespace PC_Configurator.Views.App
                         {
                             Id = (int)reader["Id"],
                             Name = reader["Name"].ToString(),
-                            Tooltip = $"Gyártó: {reader["Manufacturer"]}\nMagok: {reader["Cores"]}\nSzálak: {reader["Threads"]}\nAlap órajel: {reader["BaseClockGHz"]} GHz\nMax órajel: {reader["BoostClockGHz"]} GHz"
+                            Tooltip = $"Gyártó: {reader["Manufacturer"]}\nFoglalat: {reader["SocketName"]} {(reader["Generation"] != DBNull.Value ? $"({reader["Generation"]})" : "")}\nMagok: {reader["Cores"]}\nSzálak: {reader["Threads"]}\nAlap órajel: {reader["BaseClockGHz"]} GHz\nMax órajel: {reader["BoostClockGHz"]} GHz"
                         };
                         list.Add(cpu);
                     }
@@ -472,25 +476,122 @@ namespace PC_Configurator.Views.App
         {
             var list = new List<MotherboardView>();
             string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
-            using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+            
+            try
             {
-                conn.Open();
-                using (var cmd = new System.Data.SqlClient.SqlCommand("SELECT * FROM Motherboards", conn))
-                using (var reader = cmd.ExecuteReader())
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
                 {
-                    while (reader.Read())
+                    conn.Open();
+                    
+                    // Ellenőrizzük, hogy létezik-e a MotherboardView nézet
+                    bool viewExists = CheckIfViewExists("MotherboardView", conn);
+                    string query = viewExists 
+                        ? "SELECT * FROM MotherboardView" 
+                        : "SELECT m.*, s.SocketName FROM Motherboards m LEFT JOIN SocketTypes s ON m.SocketTypeId = s.Id";
+                    
+                    System.Diagnostics.Debug.WriteLine($"Alaplapok lekérdezése: {query}");
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        var mb = new MotherboardView
+                        // Debug: kiírjuk az összes oszlop nevét
+                        for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            Id = (int)reader["Id"],
-                            Name = reader["Name"].ToString(),
-                            Tooltip = $"Gyártó: {reader["Manufacturer"]}\nChipset: {reader["Chipset"]}\nFoglalat: {reader["Socket"]}"
-                        };
-                        list.Add(mb);
+                            System.Diagnostics.Debug.WriteLine($"Oszlop {i}: {reader.GetName(i)}");
+                        }
+                        
+                        while (reader.Read())
+                        {
+                            string socketInfo = "";
+                            
+                            // Ha létezik a SocketName oszlop, azt használjuk
+                            if (HasColumn(reader, "SocketName"))
+                            {
+                                socketInfo = reader["SocketName"].ToString();
+                            }
+                            // Ha nem, akkor megnézzük, hogy van-e Socket oszlop
+                            else if (HasColumn(reader, "Socket"))
+                            {
+                                socketInfo = reader["Socket"].ToString();
+                            }
+                            
+                            // Chipset információ
+                            string chipsetInfo = HasColumn(reader, "ChipsetTypeId") 
+                                ? $"Chipset ID: {reader["ChipsetTypeId"]}" 
+                                : (HasColumn(reader, "Chipset") ? reader["Chipset"].ToString() : "N/A");
+                            
+                            var mb = new MotherboardView
+                            {
+                                Id = (int)reader["Id"],
+                                Name = reader["Name"].ToString(),
+                                Tooltip = $"Gyártó: {reader["Manufacturer"]}\n{chipsetInfo}\nFoglalat: {socketInfo}"
+                            };
+                            list.Add(mb);
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az alaplapok betöltésekor: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Belső hiba: {ex.InnerException.Message}");
+                }
+            }
+            
             return list;
+        }
+        
+        // Ellenőrizzük, hogy létezik-e a megadott nézet
+        private bool CheckIfViewExists(string viewName, System.Data.SqlClient.SqlConnection connection)
+        {
+            try
+            {
+                string query = @"
+                    SELECT COUNT(*) 
+                    FROM INFORMATION_SCHEMA.VIEWS 
+                    WHERE TABLE_NAME = @ViewName";
+                
+                using (var cmd = new System.Data.SqlClient.SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@ViewName", viewName);
+                    int count = (int)cmd.ExecuteScalar();
+                    
+                    System.Diagnostics.Debug.WriteLine($"A {viewName} nézet létezik: {count > 0}");
+                    return count > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a nézet létezésének ellenőrzésekor ({viewName}): {ex.Message}");
+                return false;
+            }
+        }
+        
+        // Az eredeti HasColumn metódus az 573. sorban már definiálva van
+        private bool HasColumn(System.Data.SqlClient.SqlDataReader reader, string columnName)
+        {
+            if (reader == null)
+                return false;
+                
+            try
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    if (string.Equals(reader.GetName(i), columnName, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az oszlop ellenőrzése közben: {columnName} - {ex.Message}");
+                return false;
+            }
         }
 
         private List<PSUView> LoadPSUs()
@@ -628,16 +729,196 @@ namespace PC_Configurator.Views.App
         {
             try
             {
-                // Egyelőre csak jelezzük a felhasználónak, hogy melyik komponenst választotta ki
-                MessageBox.Show($"A(z) {type} típusú, {id} azonosítójú komponens részletei.\n\nEz a funkció jelenleg fejlesztés alatt áll.", 
-                    "Komponens részletei", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Komponens adatok betöltése az adatbázisból
+                object component = LoadComponentById(type, id);
                 
-                // TODO: A jövőben itt megnyithatunk egy dialógust a komponens részletes adataival,
-                // vagy átirányíthatjuk a felhasználót a szerkesztő felületre
+                if (component == null)
+                {
+                    MessageBox.Show($"A(z) {id} azonosítójú {type} komponens nem található.", 
+                        "Komponens részletei", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                
+                // Konfiguráció építőhöz adás lehetőségének felajánlása
+                MessageBoxResult result = MessageBox.Show(
+                    $"Szeretné hozzáadni a kiválasztott {type} komponenst a konfigurációs építőhöz?", 
+                    "Komponens hozzáadása", 
+                    MessageBoxButton.YesNo, 
+                    MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Komponens hozzáadása a konfigurációhoz
+                    AddComponentToBuilder(type, component);
+                    
+                    // Átváltás a konfiguráció építőre
+                    SwitchToConfigBuilder();
+                }
+                else
+                {
+                    // Ha nem akar a felhasználó hozzáadni, akkor csak megjeleníti a komponens részleteit
+                    MessageBox.Show($"A(z) {type} típusú, {id} azonosítójú komponens részletei.\n\nEz a funkció jelenleg fejlesztés alatt áll.", 
+                        "Komponens részletei", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba a komponens részleteinek megjelenítése közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        // Komponens hozzáadása a konfigurációs építőhöz
+        private void AddComponentToBuilder(string type, object component)
+        {
+            try
+            {
+                // ComponentInfo létrehozása a komponens típusa alapján
+                ComponentInfo componentInfo = null;
+                
+                switch (type)
+                {
+                    case "CPU":
+                        var cpu = component as Models.CPU;
+                        if (cpu != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = cpu.Id,
+                                Name = cpu.Name,
+                                Details = $"{cpu.Cores} mag / {cpu.Threads} szál, {cpu.BaseClockGHz} GHz ({cpu.BoostClockGHz} GHz)",
+                                Price = cpu.Price,
+                                Power = 95, // Becsült fogyasztás
+                                Type = type
+                            };
+                        }
+                        break;
+                    case "GPU":
+                        var gpu = component as Models.GPU;
+                        if (gpu != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = gpu.Id,
+                                Name = gpu.Name,
+                                Details = $"{gpu.MemoryGB} GB {gpu.MemoryType}",
+                                Price = gpu.Price,
+                                Power = 220, // Becsült fogyasztás
+                                Type = type
+                            };
+                        }
+                        break;
+                    case "RAM":
+                        var ram = component as Models.RAM;
+                        if (ram != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = ram.Id,
+                                Name = ram.Name,
+                                Details = $"{ram.CapacityGB} GB {ram.Type}, {ram.SpeedMHz} MHz",
+                                Price = ram.Price,
+                                Power = 10, // Becsült fogyasztás
+                                Type = type
+                            };
+                        }
+                        break;
+                    case "Storage":
+                        var storage = component as Models.Storage;
+                        if (storage != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = storage.Id,
+                                Name = storage.Name,
+                                Details = $"{storage.Type}, {storage.CapacityGB} GB",
+                                Price = storage.Price,
+                                Power = 5, // Becsült fogyasztás
+                                Type = type
+                            };
+                        }
+                        break;
+                    case "Motherboard":
+                        var mb = component as Models.Motherboard;
+                        if (mb != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = mb.Id,
+                                Name = mb.Name,
+                                Details = $"{mb.Manufacturer} {mb.Chipset}, {mb.Socket}",
+                                Price = mb.Price,
+                                Power = 20, // Becsült fogyasztás
+                                Type = type
+                            };
+                        }
+                        break;
+                    case "PSU":
+                        var psu = component as Models.PSU;
+                        if (psu != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = psu.Id,
+                                Name = psu.Name,
+                                Details = $"{psu.Wattage} W, {psu.EfficiencyRating}",
+                                Price = psu.Price,
+                                Power = 0, // Tápegység nem fogyaszt a rendszer szempontjából
+                                Type = type
+                            };
+                        }
+                        break;
+                    case "Case":
+                        var pcCase = component as Models.Case;
+                        if (pcCase != null)
+                        {
+                            componentInfo = new ComponentInfo
+                            {
+                                Id = pcCase.Id,
+                                Name = pcCase.Name,
+                                Details = $"{pcCase.FormFactor}, {pcCase.Color}",
+                                Price = pcCase.Price,
+                                Power = 0, // Ház nem fogyaszt a rendszer szempontjából
+                                Type = type
+                            };
+                        }
+                        break;
+                }
+                
+                if (componentInfo != null)
+                {
+                    // Komponens hozzáadása a ConfigBuilderStore-hoz
+                    var store = ConfigBuilderStore.GetInstance();
+                    store.AddComponent(type, componentInfo);
+                    
+                    MessageBox.Show($"A(z) {type} komponens hozzáadva a konfigurációs építőhöz!", 
+                        "Komponens hozzáadva", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Komponens hozzáadása a konfigurációhoz");
+            }
+        }
+        
+        // Átváltás a konfiguráció építőre
+        private void SwitchToConfigBuilder()
+        {
+            try
+            {
+                var dashboard = Window.GetWindow(this) as Views.App.Dashboard;
+                if (dashboard != null)
+                {
+                    dashboard.SetActivePage(typeof(ConfigBuilder));
+                }
+                else
+                {
+                    MessageBox.Show("Nem sikerült átváltani a konfiguráció építőre.", 
+                        "Navigációs hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Átváltás a konfiguráció építőre");
             }
         }
 
@@ -816,49 +1097,60 @@ namespace PC_Configurator.Views.App
                 switch (type)
                 {
                     case "CPU":
-                        formControl = new Views.Forms.CPU();
-                        ((Views.Forms.CPU)formControl).LoadForEdit(id);
+                        var cpuForm = new Views.Forms.CPU();
+                        cpuForm.LoadForEdit(id);
+                        cpuForm.SaveCompleted += (s, args) => editWindow.Close();
+                        formControl = cpuForm;
                         break;
                         
                     case "GPU":
-                        formControl = new Views.Forms.GPU();
-                        ((Views.Forms.GPU)formControl).LoadForEdit(id);
+                        var gpuForm = new Views.Forms.GPU();
+                        gpuForm.LoadForEdit(id);
+                        gpuForm.SaveCompleted += (s, args) => editWindow.Close();
+                        formControl = gpuForm;
                         break;
                         
                     case "RAM":
-                        formControl = new Views.Forms.RAM();
-                        ((Views.Forms.RAM)formControl).LoadForEdit(id);
+                        var ramForm = new Views.Forms.RAM();
+                        ramForm.LoadForEdit(id);
+                        ramForm.SaveCompleted += (s, args) => editWindow.Close();
+                        formControl = ramForm;
                         break;
                         
                     case "Storage":
-                        formControl = new Views.Forms.Storage();
-                        ((Views.Forms.Storage)formControl).LoadForEdit(id);
+                        var storageForm = new Views.Forms.Storage();
+                        storageForm.LoadForEdit(id);
+                        storageForm.SaveCompleted += (s, args) => editWindow.Close();
+                        formControl = storageForm;
                         break;
                         
                     case "Motherboard":
-                        formControl = new Views.Forms.Motherboard();
-                        // Alaplap betöltése szerkesztéshez
+                        var motherboardForm = new Views.Forms.Motherboard();
                         var motherboard = component as Models.Motherboard;
                         if (motherboard != null)
-                            ((Views.Forms.Motherboard)formControl).LoadForEdit(motherboard);
+                        {
+                            motherboardForm.LoadForEdit(motherboard);
+                            motherboardForm.SaveCompleted += (s, args) => editWindow.Close();
+                        }
+                        formControl = motherboardForm;
                         break;
                         
                     case "PSU":
-                        formControl = new Views.Forms.PSU();
-                        var psuForm = (Views.Forms.PSU)formControl;
+                        var psuForm = new Views.Forms.PSU();
                         psuForm.LoadForEdit(id);
-                        psuForm.CloseRequest += (s, e) => {
-                            editWindow.Close();  // Ablak bezárása
-                            LoadComponents(_currentType);  // Komponensek újratöltése
-                        };
+                        psuForm.SaveCompleted += (s, args) => editWindow.Close();
+                        formControl = psuForm;
                         break;
                         
                     case "Case":
-                        formControl = new Views.Forms.Case();
-                        // Gépház betöltése szerkesztéshez
+                        var caseForm = new Views.Forms.Case();
                         var caseModel = component as Models.Case;
                         if (caseModel != null)
-                            ((Views.Forms.Case)formControl).LoadForEdit(caseModel);
+                        {
+                            caseForm.LoadForEdit(caseModel);
+                            caseForm.SaveCompleted += (s, args) => editWindow.Close();
+                        }
+                        formControl = caseForm;
                         break;
                         
                     default:
@@ -1212,38 +1504,6 @@ namespace PC_Configurator.Views.App
             return null;
         }
         
-        // Segédfüggvény az oszlopok ellenőrzéséhez
-        private bool HasColumn(System.Data.SqlClient.SqlDataReader reader, string columnName)
-        {
-            if (reader == null)
-                return false;
-            
-            // Biztonságosabb módszer a oszlop létezésének ellenőrzésére
-            try
-            {
-                // Ha ez az oszlop nem létezik, akkor kivételt dob
-                var schemaTable = reader.GetSchemaTable();
-                bool hasColumn = false;
-                
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    if (string.Equals(reader.GetName(i), columnName, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        hasColumn = true;
-                        break;
-                    }
-                }
-                
-                // Debug információ
-                System.Diagnostics.Debug.WriteLine($"Oszlop ellenőrzése: {columnName} - {(hasColumn ? "Létezik" : "Nem létezik")}");
-                
-                return hasColumn;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Hiba az oszlop ellenőrzése közben: {columnName} - {ex.Message}");
-                return false;
-            }
-        }
+        // A HasColumn metódus már definiálva van fentebb, így ezt a másodlagos implementációt eltávolítottuk
     }
 }

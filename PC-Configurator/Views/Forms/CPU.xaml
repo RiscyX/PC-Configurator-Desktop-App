@@ -168,7 +168,7 @@
                 <TextBlock x:Name="BoostClockErrorBlock" Style="{StaticResource ValidationErrorText}"/>
 
                 <TextBlock Text="Foglalat" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>
-                <TextBox x:Name="SocketTextBox" Style="{StaticResource ModernInputBox}" Margin="0,0,0,5"/>
+                <ComboBox x:Name="SocketComboBox" Style="{StaticResource ModernComboBox}" Margin="0,0,0,5"/>
                 <TextBlock x:Name="SocketErrorBlock" Style="{StaticResource ValidationErrorText}"/>
                 
                 <TextBlock Text="Ár (HUF)" Foreground="#AAAAAA" FontSize="16" Margin="0,0,0,8"/>

@@ -14,8 +14,8 @@
             <Setter Property="BorderBrush" Value="#333333"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Margin" Value="0,0,0,16"/>
-            <Setter Property="MinHeight" Value="70"/>
+            <Setter Property="Margin" Value="0,0,0,24"/>
+            <Setter Property="MinHeight" Value="80"/>
         </Style>
         
         <!-- Component Card Selected Style -->
@@ -24,8 +24,8 @@
             <Setter Property="BorderBrush" Value="#0D66D0"/>
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Margin" Value="0,0,0,16"/>
-            <Setter Property="MinHeight" Value="70"/>
+            <Setter Property="Margin" Value="0,0,0,24"/>
+            <Setter Property="MinHeight" Value="80"/>
             <Setter Property="Effect">
                 <Setter.Value>
                     <DropShadowEffect ShadowDepth="1" BlurRadius="10" Color="#0D66D0" Opacity="0.3"/>
@@ -38,7 +38,7 @@
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#AAAAAA"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Margin" Value="0,10,0,10"/>
         </Style>
         
         <!-- Action Button Style -->
@@ -84,7 +84,7 @@
         </Style>
     </UserControl.Resources>
     
-    <Grid Margin="10">
+    <Grid Margin="20,20,20,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -105,8 +105,10 @@
             </StackPanel>
             
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                <TextBlock Text="Teljes ár:" FontSize="16" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock x:Name="TotalPriceBlock" Text="0 Ft" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                <TextBlock Text="Teljes ár:" FontSize="16" Foreground="#AAAAAA" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <Border Background="#0D66D0" CornerRadius="6" Padding="15,8,15,8">
+                    <TextBlock x:Name="TotalPriceBlock" Text="0 Ft" FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                </Border>
             </StackPanel>
         </Grid>
         
@@ -114,24 +116,24 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 
                 <!-- Left Column: Component Selection -->
-                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                <StackPanel Grid.Column="0" Margin="0,0,30,0">
                     <!-- CPU Selection -->
                     <TextBlock Text="Processzor (CPU)" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="CPUCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="CPU">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             
@@ -148,15 +150,15 @@
                     <!-- Motherboard Selection -->
                     <TextBlock Text="Alaplap" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="MotherboardCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="Motherboard">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE952;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE952;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             
@@ -173,15 +175,15 @@
                     <!-- GPU Selection -->
                     <TextBlock Text="Videókártya (GPU)" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="GPUCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="GPU">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE964;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE964;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             
@@ -198,15 +200,15 @@
                     <!-- RAM Selection -->
                     <TextBlock Text="Memória (RAM)" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="RAMCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="RAM">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             
@@ -223,15 +225,15 @@
                     <!-- Storage Selection -->
                     <TextBlock Text="Tárhely" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="StorageCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="Storage">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE96E;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE96E;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             
@@ -248,15 +250,15 @@
                     <!-- PSU Selection -->
                     <TextBlock Text="Tápegység" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="PSUCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="PSU">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE945;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             
@@ -273,15 +275,15 @@
                     <!-- Case Selection -->
                     <TextBlock Text="Számítógépház" Style="{StaticResource ComponentTypeHeader}"/>
                     <Border x:Name="CaseCard" Style="{StaticResource ComponentCard}" Cursor="Hand" MouseUp="ComponentCard_MouseUp" Tag="Case">
-                        <Grid Margin="16">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border Grid.Column="0" Width="36" Height="36" Background="#333333" CornerRadius="18" Margin="0,0,16,0">
-                                <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="White" 
+                            <Border Grid.Column="0" Width="40" Height="40" Background="#333333" CornerRadius="20" Margin="0,0,20,0">
+                                <TextBlock Text="&#xE9F9;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="White" 
                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             

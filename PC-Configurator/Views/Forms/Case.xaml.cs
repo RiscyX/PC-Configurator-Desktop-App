@@ -21,6 +21,9 @@ namespace PC_Configurator.Views.Forms
     /// </summary>
     public partial class Case : UserControl
     {
+        // Esemény a sikeres mentés jelzésére
+        public event EventHandler SaveCompleted;
+
         private int? currentId = null;
         
         public Case()
@@ -80,6 +83,9 @@ namespace PC_Configurator.Views.Forms
                     model.Id = currentId.Value;
                     model.UpdateInDatabase();
                     MessageBox.Show("Gépház sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                    
+                    // Sikeres mentés után kiváltjuk az eseményt
+                    SaveCompleted?.Invoke(this, EventArgs.Empty);
                 }
                 
                 // Mezők törlése
@@ -94,6 +100,9 @@ namespace PC_Configurator.Views.Forms
                 // Űrlap címének visszaállítása
                 FormTitle.Text = "Gépház hozzáadása";
                 currentId = null;
+
+                // Esemény kiváltása
+                SaveCompleted?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {

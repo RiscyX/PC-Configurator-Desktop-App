@@ -98,48 +98,205 @@ namespace PC_Configurator.Views.App
         // Currently selected component type (for showing selection dialog)
         private string currentComponentType = "";
         
+        // Paraméter nélküli konstruktor a navigációhoz
+        public ConfigBuilder() : this(0)
+        {
+            // Minden inicializálást a paraméteres konstruktor végez 0 paraméterrel
+        }
+        
         public ConfigBuilder(int userId = 0)
         {
             InitializeComponent();
             
+            // Debug üzenet a konstruktorból
+            System.Diagnostics.Debug.WriteLine($"ConfigBuilder konstruktor meghívva - userId: {userId}");
+            
             // Beállítjuk az aktuális felhasználó azonosítóját
             _currentUserId = userId;
             
-            // Inicializáljuk a szótárakat
+            // Sorrendben inicializáljuk a különböző adatokat
+            // 1. Alapszótárak inicializálása
             InitializeDictionaries();
             
-            // Update the total price and power for the initial state
-            UpdateTotals();
-            componentCards.Add("Case", CaseCard);
+            // 2. Komponens UI elemek szótárainak inicializálása
+            SetupComponentDictionaries();
             
-            // Initialize the component name blocks dictionary
-            componentNameBlocks.Add("CPU", CPUNameBlock);
-            componentNameBlocks.Add("GPU", GPUNameBlock);
-            componentNameBlocks.Add("RAM", RAMNameBlock);
-            componentNameBlocks.Add("Storage", StorageNameBlock);
-            componentNameBlocks.Add("Motherboard", MotherboardNameBlock);
-            componentNameBlocks.Add("PSU", PSUNameBlock);
-            componentNameBlocks.Add("Case", CaseNameBlock);
-            
-            // Initialize the component detail blocks dictionary
-            componentDetailBlocks.Add("CPU", CPUDetailBlock);
-            componentDetailBlocks.Add("GPU", GPUDetailBlock);
-            componentDetailBlocks.Add("RAM", RAMDetailBlock);
-            componentDetailBlocks.Add("Storage", StorageDetailBlock);
-            componentDetailBlocks.Add("Motherboard", MotherboardDetailBlock);
-            componentDetailBlocks.Add("PSU", PSUDetailBlock);
-            componentDetailBlocks.Add("Case", CaseDetailBlock);
-            
-            // Initialize compatibility dictionary
-            componentCompatibility.Add("CPU", false);
-            componentCompatibility.Add("Motherboard", false);
-            componentCompatibility.Add("RAM", false);
-            
-            // Betöltjük a Components osztálytól érkező alkatrészeket, ha vannak
+            // 3. Betöltjük a Components osztálytól érkező alkatrészeket
             LoadComponentsFromStore();
             
-            // Update the total price and power for the initial state
+            // 4. Frissítjük az árakat és egyéb adatokat
             UpdateTotals();
+            
+            // 5. Adatbázis ellenőrzése a háttérben (csak debug céllal)
+            Task.Run(() => CheckDatabaseTables());
+        }
+        
+        // Segédfüggvény az adatbázis táblák ellenőrzéséhez
+        private async Task CheckDatabaseTables()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Adatbázis táblák ellenőrzése...");
+                
+                // Ellenőrizzük a Motherboards és SocketTypes táblákat
+                bool motherboardsExist = await CheckIfTableExistsAsync("Motherboards");
+                bool socketTypesExist = await CheckIfTableExistsAsync("SocketTypes");
+                bool motherboardHasSocketTypeId = await CheckIfTableColumnExistsAsync("Motherboards", "SocketTypeId");
+                
+                System.Diagnostics.Debug.WriteLine($"Táblák ellenőrzése: Motherboards létezik: {motherboardsExist}, " +
+                                              $"SocketTypes létezik: {socketTypesExist}, " +
+                                              $"Motherboards.SocketTypeId létezik: {motherboardHasSocketTypeId}");
+                
+                // Ha létezik a Motherboards tábla, ellenőrizzük a rekordok számát
+                if (motherboardsExist)
+                {
+                    int count = await GetTableRowCountAsync("Motherboards");
+                    System.Diagnostics.Debug.WriteLine($"A Motherboards táblában {count} rekord található.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az adatbázis ellenőrzésekor: {ex.Message}");
+            }
+        }
+        
+        // Aszinkron függvény a táblák létezésének ellenőrzésére
+        private async Task<bool> CheckIfTableExistsAsync(string tableName)
+        {
+            try
+            {
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    return false;
+                }
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    await conn.OpenAsync();
+                    
+                    string query = @"
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.TABLES
+                        WHERE TABLE_NAME = @TableName";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@TableName", tableName);
+                        int count = (int)await cmd.ExecuteScalarAsync();
+                        return count > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a tábla létezésének ellenőrzésekor ({tableName}): {ex.Message}");
+                return false;
+            }
+        }
+        
+        // Aszinkron függvény az oszlop létezésének ellenőrzésére
+        private async Task<bool> CheckIfTableColumnExistsAsync(string tableName, string columnName)
+        {
+            try
+            {
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    return false;
+                }
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    await conn.OpenAsync();
+                    
+                    string query = @"
+                        SELECT COUNT(*)
+                        FROM INFORMATION_SCHEMA.COLUMNS
+                        WHERE TABLE_NAME = @TableName
+                        AND COLUMN_NAME = @ColumnName";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@TableName", tableName);
+                        cmd.Parameters.AddWithValue("@ColumnName", columnName);
+                        int count = (int)await cmd.ExecuteScalarAsync();
+                        return count > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba az oszlop létezésének ellenőrzésekor ({tableName}.{columnName}): {ex.Message}");
+                return false;
+            }
+        }
+        
+        // Aszinkron függvény a táblában lévő sorok számának lekérdezéséhez
+        private async Task<int> GetTableRowCountAsync(string tableName)
+        {
+            try
+            {
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    return 0;
+                }
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    await conn.OpenAsync();
+                    
+                    string query = $"SELECT COUNT(*) FROM {tableName}";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        return (int)await cmd.ExecuteScalarAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a sorok számának lekérdezésekor ({tableName}): {ex.Message}");
+                return 0;
+            }
+        }
+        
+        // Ellenőrizzük, hogy létezik-e a megadott nézet
+        private bool CheckIfViewExists(string viewName)
+        {
+            try
+            {
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    return false;
+                }
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    
+                    string query = @"
+                        SELECT COUNT(*) 
+                        FROM INFORMATION_SCHEMA.VIEWS 
+                        WHERE TABLE_NAME = @ViewName";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ViewName", viewName);
+                        int count = (int)cmd.ExecuteScalar();
+                        
+                        System.Diagnostics.Debug.WriteLine($"A {viewName} nézet létezik: {count > 0}");
+                        return count > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a nézet létezésének ellenőrzésekor ({viewName}): {ex.Message}");
+                return false;
+            }
         }
         
         // Set up mock data for demo purposes
@@ -168,37 +325,46 @@ namespace PC_Configurator.Views.App
         
         private void ShowComponentSelectionDialog(string componentType)
         {
-            // In a real implementation, this would open a dialog with components from the database
-            // For now, we'll simulate it with a message box
-            MessageBox.Show($"A {componentType} komponens választó jelenleg fejlesztés alatt áll.\n\nEbben a demó verzióban már előre be vannak állítva mintaadatok a gépösszeállítás bemutatására.", 
-                           "Komponens választó", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // For demo purposes, select a default component if not already selected
-            if (!selectedComponents.ContainsKey(componentType))
+            try
             {
-                switch(componentType)
+                // Adatbázisból betöltjük az összes ilyen típusú komponenst és kiválaszthatóvá tesszük
+                List<ComponentInfo> components = LoadComponentsFromDatabase(componentType);
+                
+                if (components != null && components.Count > 0)
                 {
-                    case "RAM":
-                        SelectComponent(componentType, 1, "Kingston HyperX 32GB", "DDR4, 3600MHz, CL16", 49900M, 25);
-                        break;
-                    case "Motherboard":
-                        SelectComponent(componentType, 2, "MSI MAG B550 TOMAHAWK", "AMD B550 chipset, AM4 foglalat", 54900M, 30);
-                        break;
-                    case "Storage":
-                        SelectComponent(componentType, 1, "Samsung 970 EVO 1TB", "NVMe SSD, 3500/3300 MB/s", 44900M, 8);
-                        break;
-                    case "PSU":
-                        SelectComponent(componentType, 1, "Corsair RM850x", "850W, Gold, moduláris", 38900M, 0);
-                        break;
-                    case "Case":
-                        SelectComponent(componentType, 4, "Lian Li PC-O11 Dynamic", "Mid Tower, fekete", 42900M, 0);
-                        break;
+                    // Itt egy valós dialógusablak nyílik meg a komponensek listázásával
+                    var selectedComponent = ShowComponentListDialog(componentType, components);
+                    
+                    if (selectedComponent != null)
+                    {
+                        // A kiválasztott komponens hozzáadása a konfigurációhoz
+                        SelectComponent(
+                            componentType,
+                            selectedComponent.Id,
+                            selectedComponent.Name,
+                            selectedComponent.Details,
+                            selectedComponent.Price,
+                            selectedComponent.Power
+                        );
+                        
+                        // Update compatibility after selection
+                        UpdateCompatibilityStatus();
+                        UpdatePerformanceRating();
+                    }
+                }
+                else
+                {
+                    // Ha nincs komponens az adatbázisban, jelezzük a felhasználónak
+                    MessageBox.Show($"Nem találhatók {componentType} komponensek az adatbázisban.", 
+                                  "Komponens választó", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-            
-            // Update compatibility after selection
-            UpdateCompatibilityStatus();
-            UpdatePerformanceRating();
+            catch (Exception ex)
+            {
+                ErrorHandler.HandleError(ex, "Komponensek betöltése");
+                MessageBox.Show($"Hiba történt a {componentType} komponensek betöltése közben.", 
+                              "Betöltési hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         
         private void SelectComponent(string type, int id, string name, string details, decimal price, int power)
@@ -398,55 +564,96 @@ namespace PC_Configurator.Views.App
             UpdatePerformanceRating();
         }
         
+        private void SetupComponentDictionaries()
+        {
+            // Initialize component cards dictionary if it's not already initialized
+            if (componentCards == null || componentCards.Count == 0)
+            {
+                componentCards = new Dictionary<string, Border>
+                {
+                    { "CPU", CPUCard },
+                    { "Motherboard", MotherboardCard },
+                    { "RAM", RAMCard },
+                    { "GPU", GPUCard },
+                    { "Storage", StorageCard },
+                    { "PSU", PSUCard },
+                    { "Case", CaseCard }
+                };
+            }
+            
+            // Check if the dictionaries are already initialized before adding items
+            if (!componentNameBlocks.ContainsKey("CPU"))
+            {
+                componentNameBlocks["CPU"] = CPUNameBlock;
+                componentNameBlocks["GPU"] = GPUNameBlock;
+                componentNameBlocks["RAM"] = RAMNameBlock;
+                componentNameBlocks["Storage"] = StorageNameBlock;
+                componentNameBlocks["Motherboard"] = MotherboardNameBlock;
+                componentNameBlocks["PSU"] = PSUNameBlock;
+                componentNameBlocks["Case"] = CaseNameBlock;
+            }
+            
+            if (!componentDetailBlocks.ContainsKey("CPU"))
+            {
+                componentDetailBlocks["CPU"] = CPUDetailBlock;
+                componentDetailBlocks["GPU"] = GPUDetailBlock;
+                componentDetailBlocks["RAM"] = RAMDetailBlock;
+                componentDetailBlocks["Storage"] = StorageDetailBlock;
+                componentDetailBlocks["Motherboard"] = MotherboardDetailBlock;
+                componentDetailBlocks["PSU"] = PSUDetailBlock;
+                componentDetailBlocks["Case"] = CaseDetailBlock;
+            }
+            
+            // Initialize compatibility dictionary if needed
+            if (!componentCompatibility.ContainsKey("CPU"))
+            {
+                componentCompatibility["CPU"] = false;
+                componentCompatibility["Motherboard"] = false;
+                componentCompatibility["RAM"] = false;
+            }
+        }
+        
         private void InitializeDictionaries()
         {
-            _selectedComponents = new Dictionary<string, ComponentInfo>
+            // Initialize _selectedComponents if needed
+            if (_selectedComponents == null || _selectedComponents.Count == 0)
             {
-                { "CPU", null },
-                { "Motherboard", null },
-                { "RAM", null },
-                { "GPU", null },
-                { "Storage", null },
-                { "PSU", null },
-                { "Case", null }
-            };
+                _selectedComponents = new Dictionary<string, ComponentInfo>
+                {
+                    { "CPU", null },
+                    { "Motherboard", null },
+                    { "RAM", null },
+                    { "GPU", null },
+                    { "Storage", null },
+                    { "PSU", null },
+                    { "Case", null }
+                };
+            }
 
-            componentCards = new Dictionary<string, Border>
+            // Initialize dictionaries only if they haven't been initialized yet
+            if (componentNameBlocks == null)
             {
-                { "CPU", CPUCard },
-                { "Motherboard", MotherboardCard },
-                { "RAM", RAMCard },
-                { "GPU", GPUCard },
-                { "Storage", StorageCard },
-                { "PSU", PSUCard },
-                { "Case", CaseCard }
-            };
+                componentNameBlocks = new Dictionary<string, TextBlock>();
+            }
 
-            componentNameBlocks = new Dictionary<string, TextBlock>
+            if (componentDetailBlocks == null)
             {
-                { "CPU", CPUNameBlock },
-                { "Motherboard", MotherboardNameBlock },
-                { "RAM", RAMNameBlock },
-                { "GPU", GPUNameBlock },
-                { "Storage", StorageNameBlock },
-                { "PSU", PSUNameBlock },
-                { "Case", CaseNameBlock }
-            };
-
-            componentDetailBlocks = new Dictionary<string, TextBlock>
-            {
-                { "CPU", CPUDetailBlock },
-                { "Motherboard", MotherboardDetailBlock },
-                { "RAM", RAMDetailBlock },
-                { "GPU", GPUDetailBlock },
-                { "Storage", StorageDetailBlock },
-                { "PSU", PSUDetailBlock },
-                { "Case", CaseDetailBlock }
-            };
+                componentDetailBlocks = new Dictionary<string, TextBlock>();
+            }
 
             // Initialize selected components too
-            selectedComponents = new Dictionary<string, ComponentItem>();
+            if (selectedComponents == null)
+            {
+                selectedComponents = new Dictionary<string, ComponentItem>();
+            }
+            
+            // Initialize compatibility dictionary
+            if (componentCompatibility == null)
+            {
+                componentCompatibility = new Dictionary<string, bool>();
+            }
 
+            // Always update UI elements
             TotalPriceBlock.Text = "0 Ft";
             PerformanceScoreBlock.Text = "0/100";
             PerformanceBar.Value = 0;
@@ -707,34 +914,161 @@ namespace PC_Configurator.Views.App
                     PerformanceScore = CalculatePerformanceScore(),
                     Components = new List<ComponentInfo>()
                 };
-
-                // Komponensek hozzáadása a konfigurációhoz
+                
+                // ID-k beállítása és komponensek hozzáadása a konfigurációhoz
                 foreach (var componentPair in selectedComponents)
                 {
-                    if (componentPair.Value != null)
+                    string type = componentPair.Key;
+                    var component = componentPair.Value;
+                    
+                    if (component != null)
                     {
+                        // ID beállítása a típusnak megfelelő tulajdonságban
+                        switch (type)
+                        {
+                            case "CPU":
+                                config.CPUId = component.Id;
+                                break;
+                            case "GPU":
+                                config.GPUId = component.Id;
+                                break;
+                            case "RAM":
+                                config.RAMId = component.Id;
+                                break;
+                            case "Storage":
+                                config.StorageId = component.Id;
+                                break;
+                            case "Motherboard":
+                                config.MotherboardId = component.Id;
+                                break;
+                            case "PSU":
+                                config.PSUId = component.Id;
+                                break;
+                            case "Case":
+                                config.CaseId = component.Id;
+                                break;
+                        }
+                        
+                        // Komponens hozzáadása a listához is (UI megjelenítéshez)
                         var componentInfo = new ComponentInfo
                         {
-                            Id = componentPair.Value.Id,
-                            Name = componentPair.Value.Name,
-                            Details = componentPair.Value.Details,
-                            Price = componentPair.Value.Price,
-                            Power = componentPair.Value.PowerConsumption
+                            Id = component.Id,
+                            Name = component.Name,
+                            Details = component.Details,
+                            Price = component.Price,
+                            Power = component.PowerConsumption,
+                            Type = type
                         };
                         
                         config.Components.Add(componentInfo);
                     }
                 }
 
-                // Konfiguráció mentése az adatbázisba
-                config.SaveToDatabase();
+                // Komponensek ellenőrzése a mentés előtt
+                bool componentsValid = ValidateComponents(config);
+                if (!componentsValid)
+                {
+                    return; // Ha a komponensek érvénytelenek, nem megyünk tovább
+                }
 
-                MessageBox.Show("A konfiguráció sikeresen mentésre került!",
-                              "Sikeres Mentés", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Konfiguráció mentése az adatbázisba
+                System.Diagnostics.Debug.WriteLine($"Konfiguráció mentése: {name}, komponensek száma: {config.Components.Count}");
+                bool success = config.SaveToDatabase();
+                
+                if (success)
+                {
+                    MessageBox.Show($"A konfiguráció sikeresen mentésre került '{name}' néven!",
+                                  "Sikeres Mentés", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    // Hiba esetén részletes információkat írunk ki
+                    System.Diagnostics.Debug.WriteLine("Hiba a konfiguráció mentése közben:");
+                    
+                    // Komponensek kiírása debug célokra
+                    DumpComponentIds(config);
+                    
+                    MessageBox.Show("Hiba történt a konfiguráció mentése közben.\n\nEllenőrizze, hogy minden kiválasztott komponens megfelelően van rögzítve az adatbázisban.",
+                                  "Mentési Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció mentése közben: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Belső hiba: {ex.InnerException.Message}");
+                }
                 ErrorHandler.HandleDatabaseError(ex, "mentés", "konfiguráció");
+            }
+        }
+        
+        // Komponensek ellenőrzése mentés előtt
+        private bool ValidateComponents(ConfigurationModel config)
+        {
+            // Komponens ID-k érvényességének ellenőrzése
+            foreach (var component in config.Components)
+            {
+                if (component.Id <= 0)
+                {
+                    MessageBox.Show($"A(z) {component.Type} komponens nem rendelkezik érvényes azonosítóval. Kérjük, válasszon másik komponenst.",
+                                  "Érvénytelen Komponens", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return false;
+                }
+                
+                // Ellenőrizzük, hogy a komponens létezik-e az adatbázisban
+                if (!CheckComponentExistence(component.Type, component.Id))
+                {
+                    MessageBox.Show($"A(z) {component.Name} ({component.Type}) nem található az adatbázisban vagy hiányos adatokkal rendelkezik. Kérjük, válasszon másik komponenst.",
+                                  "Hiányzó Komponens", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Komponens létezésének ellenőrzése az adatbázisban
+        private bool CheckComponentExistence(string componentType, int id)
+        {
+            try
+            {
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                string tableName = GetTableNameByType(componentType);
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    using (var cmd = new System.Data.SqlClient.SqlCommand($"SELECT COUNT(*) FROM {tableName} WHERE Id = @Id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", id);
+                        int count = (int)cmd.ExecuteScalar();
+                        return count > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a komponens létezésének ellenőrzésekor: {ex.Message}");
+                return false;
+            }
+        }
+        
+        // Komponens ID-k kiírása hibakereséshez
+        private void DumpComponentIds(ConfigurationModel config)
+        {
+            System.Diagnostics.Debug.WriteLine($"Konfiguráció ID: {config.Id}");
+            System.Diagnostics.Debug.WriteLine($"CPU ID: {config.CPUId}");
+            System.Diagnostics.Debug.WriteLine($"GPU ID: {config.GPUId}");
+            System.Diagnostics.Debug.WriteLine($"RAM ID: {config.RAMId}");
+            System.Diagnostics.Debug.WriteLine($"Storage ID: {config.StorageId}");
+            System.Diagnostics.Debug.WriteLine($"Motherboard ID: {config.MotherboardId}");
+            System.Diagnostics.Debug.WriteLine($"PSU ID: {config.PSUId}");
+            System.Diagnostics.Debug.WriteLine($"Case ID: {config.CaseId}");
+            
+            System.Diagnostics.Debug.WriteLine("Komponens lista:");
+            foreach (var component in config.Components)
+            {
+                System.Diagnostics.Debug.WriteLine($"  {component.Type}: ID={component.Id}, Name={component.Name}");
             }
         }
         
@@ -742,17 +1076,25 @@ namespace PC_Configurator.Views.App
         {
             try
             {
-                // A betöltés módosítva a ConfigurationModel.LoadUserConfigurations-ből egyedi lekérdezésre
-                var configs = ConfigurationModel.LoadUserConfigurations(_currentUserId);
-                var config = configs.FirstOrDefault(c => c.Id == configId);
+                // Közvetlen betöltés a ConfigurationModel.LoadFromDatabase metódussal
+                var config = ConfigurationModel.LoadFromDatabase(configId);
                 
                 if (config != null)
                 {
+                    // Komponensek betöltése objektumként
+                    config.LoadComponents();
+                    
                     LoadConfiguration(config);
+                }
+                else
+                {
+                    MessageBox.Show("A konfiguráció nem található.",
+                                  "Betöltési Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció betöltése közben: {ex.Message}");
                 ErrorHandler.HandleError(ex, "Konfiguráció betöltése");
             }
         }
@@ -761,7 +1103,7 @@ namespace PC_Configurator.Views.App
         {
             try
             {
-                if (config == null || config.Components == null)
+                if (config == null)
                 {
                     MessageBox.Show("A konfiguráció betöltése sikertelen: Hiányzó adatok",
                                   "Betöltési Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -771,36 +1113,109 @@ namespace PC_Configurator.Views.App
                 // Tisztítjuk a jelenlegi komponenseket
                 ClearConfig();
 
-                // Betöltjük az új komponenseket a ComponentInfo-ból a selectedComponents szótárba
-                foreach (var component in config.Components)
+                // Komponensek betöltése
+                if (config.CPU != null)
                 {
-                    if (component != null)
+                    SelectComponent(
+                        "CPU",
+                        config.CPU.Id,
+                        config.CPU.Name,
+                        $"{config.CPU.Cores} mag / {config.CPU.Threads} szál, {config.CPU.BaseClockGHz} GHz",
+                        config.CPU.Price,
+                        config.CPU.PowerConsumption
+                    );
+                }
+                
+                if (config.GPU != null)
+                {
+                    SelectComponent(
+                        "GPU",
+                        config.GPU.Id,
+                        config.GPU.Name,
+                        $"{config.GPU.Memory}GB {config.GPU.MemoryType}",
+                        config.GPU.Price,
+                        config.GPU.PowerConsumption
+                    );
+                }
+                
+                if (config.RAM != null)
+                {
+                    SelectComponent(
+                        "RAM",
+                        config.RAM.Id,
+                        config.RAM.Name,
+                        $"{config.RAM.CapacityGB}GB {config.RAM.Type}, {config.RAM.SpeedMHz} MHz",
+                        config.RAM.Price,
+                        config.RAM.PowerConsumption
+                    );
+                }
+                
+                if (config.Storage != null)
+                {
+                    SelectComponent(
+                        "Storage",
+                        config.Storage.Id,
+                        config.Storage.Name,
+                        $"{config.Storage.Capacity}GB {config.Storage.Type}",
+                        config.Storage.Price,
+                        config.Storage.PowerConsumption
+                    );
+                }
+                
+                if (config.Motherboard != null)
+                {
+                    SelectComponent(
+                        "Motherboard",
+                        config.Motherboard.Id,
+                        config.Motherboard.Name,
+                        $"{config.Motherboard.Chipset}, {config.Motherboard.Socket}",
+                        config.Motherboard.Price,
+                        config.Motherboard.PowerConsumption
+                    );
+                }
+                
+                if (config.PSU != null)
+                {
+                    SelectComponent(
+                        "PSU",
+                        config.PSU.Id,
+                        config.PSU.Name,
+                        $"{config.PSU.Wattage}W, {config.PSU.Efficiency}",
+                        config.PSU.Price,
+                        0 // Tápegységnek nincs fogyasztása a számítógép szempontjából
+                    );
+                }
+                
+                if (config.Case != null)
+                {
+                    SelectComponent(
+                        "Case",
+                        config.Case.Id,
+                        config.Case.Name,
+                        $"{config.Case.FormFactor}, {config.Case.Color}",
+                        config.Case.Price,
+                        0 // Háznak nincs fogyasztása a számítógép szempontjából
+                    );
+                }
+                
+                // Alternatív betöltés, ha nincsenek konkrét komponens objektumok, csak ComponentInfo
+                if (config.Components != null && config.Components.Count > 0 && 
+                    !(config.CPU != null || config.GPU != null || config.RAM != null || 
+                      config.Storage != null || config.Motherboard != null || 
+                      config.PSU != null || config.Case != null))
+                {
+                    foreach (var component in config.Components)
                     {
-                        // A komponens típusát a ComponentType tulajdonságból olvassuk ki
-                        string componentType = DetermineComponentType(component);
-                        if (!string.IsNullOrEmpty(componentType))
+                        if (component != null && !string.IsNullOrEmpty(component.Type))
                         {
-                            // Létrehozunk egy új ComponentItem-et a ComponentInfo alapján
-                            var componentItem = new ComponentItem
-                            {
-                                Id = component.Id,
-                                Name = component.Name,
-                                Details = component.Details,
-                                Price = component.Price,
-                                PowerConsumption = component.Power
-                            };
-                            
-                            selectedComponents[componentType] = componentItem;
-                            
-                            // Frissítjük a felhasználói felületet
-                            if (componentNameBlocks.ContainsKey(componentType))
-                                componentNameBlocks[componentType].Text = component.Name;
-                                
-                            if (componentDetailBlocks.ContainsKey(componentType))
-                                componentDetailBlocks[componentType].Text = component.Details;
-                                
-                            if (componentCards.ContainsKey(componentType))
-                                componentCards[componentType].Style = (Style)FindResource("ComponentCardSelected");
+                            SelectComponent(
+                                component.Type,
+                                component.Id,
+                                component.Name,
+                                component.Details,
+                                component.Price,
+                                component.Power
+                            );
                         }
                     }
                 }
@@ -817,6 +1232,11 @@ namespace PC_Configurator.Views.App
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció betöltése közben: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Belső hiba: {ex.InnerException.Message}");
+                }
                 ErrorHandler.HandleError(ex, "Konfiguráció betöltése");
             }
         }
@@ -1125,6 +1545,273 @@ namespace PC_Configurator.Views.App
             TotalPrice = totalPrice;
             TotalPower = totalPower;
         }
+        
+        // Komponensek betöltése az adatbázisból típus szerint
+        private List<ComponentInfo> LoadComponentsFromDatabase(string componentType)
+        {
+            List<ComponentInfo> components = new List<ComponentInfo>();
+            string connStr = "";
+            
+            try
+            {
+                // Adatbázis kapcsolat string lekérése
+                connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    throw new InvalidOperationException("Az adatbázis kapcsolat string nincs konfigurálva.");
+                }
+                
+                // Táblanév lekérése a komponens típus alapján
+                string tableName = GetTableNameByType(componentType);
+                if (string.IsNullOrEmpty(tableName))
+                {
+                    throw new InvalidOperationException($"Ismeretlen komponens típus: {componentType}");
+                }
+                
+                // Lekérdezés meghatározása a komponens típus alapján
+                string query;
+                if (componentType == "Motherboard")
+                {
+                    // Ellenőrizzük, hogy létezik-e a MotherboardView nézet
+                    bool viewExists = CheckIfViewExists("MotherboardView");
+                    
+                    if (viewExists)
+                    {
+                        // Ha létezik a nézet, használjuk azt
+                        System.Diagnostics.Debug.WriteLine("MotherboardView nézet használata az alaplapok lekérdezéséhez.");
+                        query = "SELECT * FROM MotherboardView";
+                    }
+                    else
+                    {
+                        // Ha nem létezik a nézet, visszatérünk a régi JOIN lekérdezéshez
+                        System.Diagnostics.Debug.WriteLine("MotherboardView nézet nem létezik. JOIN lekérdezés használata.");
+                        
+                        // Ellenőrizzük, hogy létezik-e a SocketTypes tábla és a SocketTypeId mező
+                        bool socketTypeExists = CheckIfTableColumnExists("SocketTypes", "Id");
+                        bool motherboardHasSocketTypeId = CheckIfTableColumnExists("Motherboards", "SocketTypeId");
+                        
+                        if (socketTypeExists && motherboardHasSocketTypeId)
+                        {
+                            query = $"SELECT m.*, s.SocketName, s.Manufacturer as SocketManufacturer FROM {tableName} m LEFT JOIN SocketTypes s ON m.SocketTypeId = s.Id";
+                        }
+                        else
+                        {
+                            // Ha nem létezik a SocketTypes tábla vagy a SocketTypeId mező, használjuk az egyszerű lekérdezést
+                            System.Diagnostics.Debug.WriteLine("A SocketTypes tábla vagy a SocketTypeId mező nem létezik. Egyszerű lekérdezés használata.");
+                            query = $"SELECT * FROM {tableName}";
+                        }
+                    }
+                }
+                else
+                {
+                    query = $"SELECT * FROM {tableName}";
+                }
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    System.Diagnostics.Debug.WriteLine($"Adatbázis kapcsolat nyitva: {conn.State}, Lekérdezés: {query}");
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(query, conn))
+                    {
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Lekérdezés futtatva, oszlopok száma: {reader.FieldCount}");
+                            
+                            // Oszlopnevek kiírása a debugoláshoz
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Oszlop {i}: {reader.GetName(i)}");
+                            }
+                            
+                            // Adatok olvasása
+                            int recordCount = 0;
+                            while (reader.Read())
+                            {
+                                recordCount++;
+                                try
+                                {
+                                    var component = new ComponentInfo
+                                    {
+                                        Id = (int)reader["Id"],
+                                        Name = reader["Name"].ToString(),
+                                        Type = componentType,
+                                        // További tulajdonságok betöltése a típustól függően
+                                        Details = CreateDetailsString(reader, componentType),
+                                        Price = reader["Price"] != DBNull.Value ? Convert.ToDecimal(reader["Price"]) : 0,
+                                        Power = EstimatePowerConsumption(reader, componentType)
+                                    };
+                                    
+                                    components.Add(component);
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Hiba az adatok olvasásakor a {recordCount}. rekordnál: {ex.Message}");
+                                }
+                            }
+                            
+                            System.Diagnostics.Debug.WriteLine($"Összesen {recordCount} rekord beolvasva, {components.Count} komponens létrehozva");
+                        }
+                    }
+                }
+                
+                if (components.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Nem sikerült adatokat betölteni a(z) {tableName} táblából.");
+                }
+                
+                return components;
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = $"Hiba a komponensek betöltésekor ({componentType}): {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" - {ex.InnerException.Message}";
+                }
+                
+                System.Diagnostics.Debug.WriteLine(errorMessage);
+                System.Diagnostics.Debug.WriteLine($"Connection string: {connStr}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                // Az alkalmazás hibakezelőjével jelezzük a problémát
+                ErrorHandler.HandleError(ex, $"Komponensek betöltése ({componentType})", false);
+                
+                return new List<ComponentInfo>(); // Üres lista hiba esetén, nem tesztadatok
+            }
+        }
+        
+        // Dialógusablak megjelenítése a komponensek listázásához és kiválasztásához
+        private ComponentInfo ShowComponentListDialog(string componentType, List<ComponentInfo> components)
+        {
+            // Dialógus ablak létrehozása
+            Window dialog = new Window
+            {
+                Title = $"{componentType} kiválasztása",
+                Width = 600,
+                Height = 500,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                ResizeMode = ResizeMode.CanResize,
+                WindowStyle = WindowStyle.ToolWindow
+            };
+            
+            // Fő grid létrehozása
+            Grid mainGrid = new Grid();
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(50, GridUnitType.Pixel) });
+            mainGrid.Margin = new Thickness(15);
+            
+            // ListView a komponensek megjelenítéséhez
+            ListView componentListView = new ListView();
+            componentListView.SelectionMode = SelectionMode.Single;
+            componentListView.Margin = new Thickness(0, 0, 0, 10);
+            
+            // GridView oszlopok beállítása
+            GridView gridView = new GridView();
+            
+            // Komponens neve
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Név",
+                Width = 250,
+                DisplayMemberBinding = new Binding("Name")
+            });
+            
+            // Komponens részletei
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Részletek",
+                Width = 250,
+                DisplayMemberBinding = new Binding("Details")
+            });
+            
+            // Komponens ára
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Ár",
+                Width = 80,
+                DisplayMemberBinding = new Binding("Price") { StringFormat = "{0:N0} Ft" }
+            });
+            
+            componentListView.View = gridView;
+            componentListView.ItemsSource = components;
+            
+            // Komponensek hozzáadása a fő gridhez
+            Grid.SetRow(componentListView, 0);
+            mainGrid.Children.Add(componentListView);
+            
+            // Gomb panel létrehozása
+            StackPanel buttonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+            
+            Button cancelButton = new Button
+            {
+                Content = "Mégsem",
+                Padding = new Thickness(20, 5, 20, 5),
+                Margin = new Thickness(0, 0, 10, 0)
+            };
+            
+            Button selectButton = new Button
+            {
+                Content = "Kiválasztás",
+                Padding = new Thickness(20, 5, 20, 5),
+                IsDefault = true,
+                IsEnabled = false // Kezdetben inaktív, amíg nem választunk ki komponenst
+            };
+            
+            // Gombok hozzáadása a panelhez
+            buttonPanel.Children.Add(cancelButton);
+            buttonPanel.Children.Add(selectButton);
+            
+            // Gombpanel hozzáadása a fő gridhez
+            Grid.SetRow(buttonPanel, 1);
+            mainGrid.Children.Add(buttonPanel);
+            
+            // Dialógus tartalmának beállítása
+            dialog.Content = mainGrid;
+            
+            // Visszatérési érték
+            ComponentInfo selectedComponent = null;
+            
+            // Kiválasztás változása eseménykezelő
+            componentListView.SelectionChanged += (s, e) =>
+            {
+                selectButton.IsEnabled = componentListView.SelectedItem != null;
+            };
+            
+            // Dupla kattintás eseménykezelő
+            componentListView.MouseDoubleClick += (s, e) =>
+            {
+                if (componentListView.SelectedItem != null)
+                {
+                    selectedComponent = componentListView.SelectedItem as ComponentInfo;
+                    dialog.DialogResult = true;
+                }
+            };
+            
+            // Mégsem gomb eseménykezelő
+            cancelButton.Click += (s, e) =>
+            {
+                dialog.DialogResult = false;
+            };
+            
+            // Kiválasztás gomb eseménykezelő
+            selectButton.Click += (s, e) =>
+            {
+                if (componentListView.SelectedItem != null)
+                {
+                    selectedComponent = componentListView.SelectedItem as ComponentInfo;
+                    dialog.DialogResult = true;
+                }
+            };
+            
+            // Dialógus megjelenítése és visszatérés a kiválasztott komponenssel
+            bool? result = dialog.ShowDialog();
+            return result == true ? selectedComponent : null;
+        }
 
         private int CalculatePerformanceScore()
         {
@@ -1233,29 +1920,282 @@ namespace PC_Configurator.Views.App
         {
             try
             {
-                // Itt kellene betölteni a komponenseket egy átmeneti tárolóból, más osztályból vagy szolgáltatásból
-                // Ebben a példában csak egy üres implementációt adunk, ami nem csinál semmit
-                
-                // Példa implementáció a ConfigBuilderStore osztályra támaszkodva (ha létezne)
-                /*
+                // Betöltjük a komponenseket a ConfigBuilderStore-ból
                 var store = ConfigBuilderStore.GetInstance();
                 if (store.HasStoredComponents)
                 {
-                    foreach (var component in store.GetComponents())
+                    foreach (var componentPair in store.GetComponents())
                     {
-                        string componentType = component.Type;
-                        if (!string.IsNullOrEmpty(componentType) && _selectedComponents.ContainsKey(componentType))
+                        string componentType = componentPair.Key;
+                        var component = componentPair.Value;
+                        
+                        if (!string.IsNullOrEmpty(componentType) && componentCards.ContainsKey(componentType))
                         {
-                            _selectedComponents[componentType] = component;
+                            // Kiválasztott komponens adatainak mentése
+                            SelectComponent(
+                                componentType, 
+                                component.Id, 
+                                component.Name, 
+                                component.Details, 
+                                component.Price, 
+                                component.PowerConsumption
+                            );
                         }
                     }
-                    UpdateComponentDisplay();
+                    
+                    // Frissítjük a kompatibilitást és teljesítmény értékelést
+                    UpdateCompatibilityStatus();
+                    UpdatePerformanceRating();
                 }
-                */
             }
             catch (Exception ex)
             {
                 ErrorHandler.HandleError(ex, "Komponensek betöltése");
+            }
+        }
+        
+        // A komponens típusa alapján visszaadja a megfelelő táblanevet
+        private string GetTableNameByType(string type)
+        {
+            switch (type)
+            {
+                case "CPU": return "CPUs";
+                case "GPU": return "GPUs";
+                case "RAM": return "RAMs";
+                case "Storage": return "Storages";
+                case "Motherboard": return "Motherboards";
+                case "PSU": return "PSUs";
+                case "Case": return "Cases";
+                default: throw new ArgumentException($"Ismeretlen komponens típus: {type}");
+            }
+        }
+        
+        // Létrehozza a részletek string-et a komponens típusa alapján
+        private string CreateDetailsString(System.Data.SqlClient.SqlDataReader reader, string componentType)
+        {
+            try
+            {
+                switch (componentType)
+                {
+                    case "CPU":
+                        string cores = HasColumn(reader, "Cores") ? reader["Cores"].ToString() : "N/A";
+                        string threads = HasColumn(reader, "Threads") ? reader["Threads"].ToString() : "N/A";
+                        string baseClockGHz = HasColumn(reader, "BaseClockGHz") ? reader["BaseClockGHz"].ToString() : "N/A";
+                        string boostClockGHz = HasColumn(reader, "BoostClockGHz") ? reader["BoostClockGHz"].ToString() : "N/A";
+                        return $"{cores} mag / {threads} szál, {baseClockGHz} GHz ({boostClockGHz} GHz)";
+                        
+                    case "GPU":
+                        string memoryGB = HasColumn(reader, "MemoryGB") ? reader["MemoryGB"].ToString() : "N/A";
+                        string memoryType = HasColumn(reader, "MemoryType") ? reader["MemoryType"].ToString() : "GDDR";
+                        return $"{memoryGB} GB {memoryType}";
+                        
+                    case "RAM":
+                        string capacityGB = HasColumn(reader, "CapacityGB") ? reader["CapacityGB"].ToString() : "N/A";
+                        string speedMHz = HasColumn(reader, "SpeedMHz") ? reader["SpeedMHz"].ToString() : "N/A";
+                        string type = HasColumn(reader, "Type") ? reader["Type"].ToString() : "N/A";
+                        return $"{capacityGB} GB {type}, {speedMHz} MHz";
+                        
+                    case "Storage":
+                        string storageType = HasColumn(reader, "Type") ? reader["Type"].ToString() : "N/A";
+                        string storageCapacityGB = HasColumn(reader, "CapacityGB") ? reader["CapacityGB"].ToString() : "N/A";
+                        return $"{storageType}, {storageCapacityGB} GB";
+                        
+                    case "Motherboard":
+                        string manufacturer = HasColumn(reader, "Manufacturer") ? reader["Manufacturer"].ToString() : "N/A";
+                        
+                        // ChipsetTypeId alapján kellene lekérdezni a chipset nevét, de most csak az ID-t használjuk
+                        string chipsetType = HasColumn(reader, "ChipsetTypeId") ? reader["ChipsetTypeId"].ToString() : "N/A";
+                        
+                        // Először a SocketName-et keressük (VIEW vagy JOIN esetén), ha nincs, akkor a Socket mezőt próbáljuk
+                        string socket = HasColumn(reader, "SocketName") ? reader["SocketName"].ToString() : 
+                                      (HasColumn(reader, "Socket") ? reader["Socket"].ToString() : "N/A");
+                        
+                        // Formátum meghatározása
+                        string socketInfo = !string.IsNullOrEmpty(socket) ? socket : "Ismeretlen foglalat";
+                        
+                        // Debug információ a konzolra
+                        System.Diagnostics.Debug.WriteLine($"Motherboard adatok: {manufacturer}, Chipset: {chipsetType}, Socket: {socketInfo}");
+                        
+                        return $"{manufacturer}, {socketInfo} foglalat";
+                        
+                    case "PSU":
+                        string wattage = HasColumn(reader, "Wattage") ? reader["Wattage"].ToString() : "N/A";
+                        string efficiencyRating = HasColumn(reader, "EfficiencyRating") ? reader["EfficiencyRating"].ToString() : "N/A";
+                        return $"{wattage} W, {efficiencyRating}";
+                        
+                    case "Case":
+                        string formFactor = HasColumn(reader, "FormFactor") ? reader["FormFactor"].ToString() : "N/A";
+                        string color = HasColumn(reader, "Color") ? reader["Color"].ToString() : "N/A";
+                        return $"{formFactor}, {color}";
+                        
+                    default:
+                        return "Részletek nem elérhetőek";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a részletek string létrehozásakor: {ex.Message}");
+                return "Részletek nem elérhetőek";
+            }
+        }
+        
+        // Becsült fogyasztás meghatározása a típus és adatok alapján
+        private int EstimatePowerConsumption(System.Data.SqlClient.SqlDataReader reader, string componentType)
+        {
+            try
+            {
+                switch (componentType)
+                {
+                    case "CPU":
+                        // Ha van explicit PowerConsumption érték, azt használjuk
+                        if (HasColumn(reader, "PowerConsumption") && reader["PowerConsumption"] != DBNull.Value)
+                        {
+                            return Convert.ToInt32(reader["PowerConsumption"]);
+                        }
+                        
+                        // Egyébként becsüljük a magok száma alapján
+                        if (HasColumn(reader, "Cores") && reader["Cores"] != DBNull.Value)
+                        {
+                            int cores = Convert.ToInt32(reader["Cores"]);
+                            return cores * 15; // Becsült érték magonként
+                        }
+                        return 95; // Alapértelmezett becslés
+                        
+                    case "GPU":
+                        // Ha van explicit PowerConsumption érték, azt használjuk
+                        if (HasColumn(reader, "PowerConsumption") && reader["PowerConsumption"] != DBNull.Value)
+                        {
+                            return Convert.ToInt32(reader["PowerConsumption"]);
+                        }
+                        
+                        // Memória mennyisége alapján becsüljük
+                        if (HasColumn(reader, "MemoryGB") && reader["MemoryGB"] != DBNull.Value)
+                        {
+                            int memoryGB = Convert.ToInt32(reader["MemoryGB"]);
+                            return memoryGB * 20 + 50; // Becsült érték memória és alap alapján
+                        }
+                        return 200; // Alapértelmezett becslés
+                        
+                    case "RAM":
+                        return 10; // RAM fogyasztás általában alacsony és konstans
+                        
+                    case "Storage":
+                        string storageType = HasColumn(reader, "Type") ? reader["Type"].ToString().ToLower() : "";
+                        // SSD és NVMe kevesebbet fogyaszt, mint a HDD
+                        if (storageType.Contains("ssd") || storageType.Contains("nvme"))
+                            return 5;
+                        else if (storageType.Contains("hdd"))
+                            return 10;
+                        return 5; // Alapértelmezett becslés
+                        
+                    case "Motherboard":
+                        // Ha van explicit érték, azt használjuk
+                        if (HasColumn(reader, "PowerConsumption") && reader["PowerConsumption"] != DBNull.Value)
+                        {
+                            return Convert.ToInt32(reader["PowerConsumption"]);
+                        }
+                        return 30; // Alapértelmezett becslés
+                        
+                    case "PSU":
+                    case "Case":
+                        return 0; // Ezek nem fogyasztanak a rendszer szempontjából
+                        
+                    default:
+                        return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a fogyasztás becslésekor: {ex.Message}");
+                return 0;
+            }
+        }
+        
+        // Segédfüggvény annak ellenőrzésére, hogy az olvasó tartalmazza-e az adott oszlopot
+        private bool HasColumn(System.Data.SqlClient.SqlDataReader reader, string columnName)
+        {
+            if (reader == null)
+                return false;
+                
+            try
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    if (string.Equals(reader.GetName(i), columnName, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        
+        // Segédfüggvény annak ellenőrzésére, hogy létezik-e az adott tábla és oszlop az adatbázisban
+        private bool CheckIfTableColumnExists(string tableName, string columnName)
+        {
+            try
+            {
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["MyDb"].ConnectionString;
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    System.Diagnostics.Debug.WriteLine("Az adatbázis kapcsolat string nincs konfigurálva.");
+                    return false;
+                }
+                
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    
+                    // Ellenőrizzük, hogy létezik-e a tábla
+                    string tableCheckQuery = @"
+                        SELECT COUNT(*) 
+                        FROM INFORMATION_SCHEMA.TABLES 
+                        WHERE TABLE_NAME = @TableName";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(tableCheckQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@TableName", tableName);
+                        int tableCount = (int)cmd.ExecuteScalar();
+                        
+                        if (tableCount == 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"A(z) {tableName} tábla nem létezik.");
+                            return false;
+                        }
+                    }
+                    
+                    // Ellenőrizzük, hogy létezik-e az oszlop
+                    string columnCheckQuery = @"
+                        SELECT COUNT(*) 
+                        FROM INFORMATION_SCHEMA.COLUMNS 
+                        WHERE TABLE_NAME = @TableName 
+                        AND COLUMN_NAME = @ColumnName";
+                    
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(columnCheckQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@TableName", tableName);
+                        cmd.Parameters.AddWithValue("@ColumnName", columnName);
+                        int columnCount = (int)cmd.ExecuteScalar();
+                        
+                        if (columnCount == 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"A(z) {columnName} oszlop nem létezik a(z) {tableName} táblában.");
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Hiba a tábla/oszlop létezésének ellenőrzésekor: {ex.Message}");
+                return false;
             }
         }
     }

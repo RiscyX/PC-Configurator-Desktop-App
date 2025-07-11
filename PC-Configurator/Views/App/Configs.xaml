@@ -86,7 +86,7 @@
         </Style>
     </UserControl.Resources>
     
-    <Grid Margin="20">
+    <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -94,84 +94,39 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="30"/>
+        </Grid.ColumnDefinitions>
+        
         <!-- Header -->
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,0,30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
-            <TextBlock Text="Mentett konfigurációk" FontSize="24" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+            <TextBlock Text="Mentett konfigurációk" FontSize="32" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
             
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <TextBlock x:Name="ConfigCountBlock" Text="3 konfiguráció" FontSize="16" Foreground="#AAAAAA" 
-                          VerticalAlignment="Center" Margin="0,0,16,0"/>
-                <Button Style="{StaticResource ActionButton}" Content="Új konfiguráció" Click="NewConfig_Click"/>
+                <TextBlock x:Name="ConfigCountBlock" Text="3 konfiguráció" FontSize="18" Foreground="#AAAAAA" 
+                          VerticalAlignment="Center" Margin="0,0,20,0"/>
+                <Button Style="{StaticResource ActionButton}" Content="Új konfiguráció" Click="NewConfig_Click"
+                       FontSize="16" Padding="25,10,25,10" Height="45"/>
             </StackPanel>
         </Grid>
         
-        <!-- Search and Filter -->
-        <Grid Grid.Row="1" Margin="0,24,0,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- Search Box -->
-            <Border Grid.Column="0" Background="#252525" BorderBrush="#333333" BorderThickness="1" CornerRadius="6" Padding="12,0,12,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                             Foreground="#777777" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                    <TextBox Grid.Column="1" x:Name="SearchBox" Background="Transparent" BorderThickness="0" 
-                           Foreground="White" FontSize="14" VerticalContentAlignment="Center" Height="40" 
-                           Padding="0" TextChanged="SearchBox_TextChanged" 
-                           CaretBrush="White">
-                        <TextBox.Resources>
-                            <Style TargetType="{x:Type TextBox}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type TextBox}">
-                                            <Border Background="{TemplateBinding Background}" BorderThickness="0">
-                                                <ScrollViewer x:Name="PART_ContentHost"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TextBox.Resources>
-                    </TextBox>
-                </Grid>
-            </Border>
-            
-            <!-- Sort Dropdown -->
-            <ComboBox Grid.Column="1" x:Name="SortComboBox" Width="200" Height="40" Margin="16,0,0,0" 
-                     Background="#252525" Foreground="White" BorderBrush="#333333" BorderThickness="1"
-                     SelectionChanged="SortComboBox_SelectionChanged">
-                <ComboBoxItem Content="Legújabb elöl" IsSelected="True"/>
-                <ComboBoxItem Content="Legrégebbi elöl"/>
-                <ComboBoxItem Content="Név szerint (A-Z)"/>
-                <ComboBoxItem Content="Név szerint (Z-A)"/>
-                <ComboBoxItem Content="Ár szerint (növekvő)"/>
-                <ComboBoxItem Content="Ár szerint (csökkenő)"/>
-            </ComboBox>
-        </Grid>
-        
         <!-- Configurations List -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl x:Name="ConfigList">
+        <ScrollViewer Grid.Row="2" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,20,0,0">
+            <ItemsControl x:Name="ConfigList" HorizontalContentAlignment="Stretch" Width="Auto">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.Items>                    <!-- Sample Item 1 -->
-                    <Border Style="{StaticResource ConfigItem}" MouseUp="ConfigItem_Click" Tag="1" Padding="20">
+                    <Border Style="{StaticResource ConfigItem}" MouseUp="ConfigItem_Click" Tag="1" Padding="35">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -187,22 +142,19 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Játékra optimalizált konfiguráció" FontSize="18" FontWeight="Bold" Foreground="White"/>
-                                    <TextBlock Text="Mentve: 2025.06.20. 15:30" FontSize="12" Foreground="#999999" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Játékra optimalizált konfiguráció" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock Text="Mentve: 2025.06.20. 15:30" FontSize="14" Foreground="#999999" Margin="0,8,0,0"/>
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource IconButton}" Click="EditConfig_Click" Tag="1">
-                                        <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
-                                    </Button>
-                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="1">
-                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="1" Width="48" Height="48">
+                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                                     </Button>
                                 </StackPanel>
                             </Grid>
                             
                             <!-- Configuration Details -->
-                            <Grid Grid.Row="1" Margin="0,16,0,16">
+                            <Grid Grid.Row="1" Margin="0,30,0,30">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -211,22 +163,22 @@
                                 
                                 <!-- Main Components -->
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="CPU: AMD Ryzen 7 5800X" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
-                                    <TextBlock Text="GPU: NVIDIA RTX 3070" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
-                                    <TextBlock Text="RAM: 32GB DDR4 3600MHz" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
+                                    <TextBlock Text="CPU: AMD Ryzen 7 5800X" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
+                                    <TextBlock Text="GPU: NVIDIA RTX 3070" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
+                                    <TextBlock Text="RAM: 32GB DDR4 3600MHz" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
                                 </StackPanel>
                                 
                                 <!-- Other Components -->
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Alaplap: MSI MAG B550" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
-                                    <TextBlock Text="Tárhely: 1TB NVMe SSD" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
-                                    <TextBlock Text="Ház: Lian Li PC-O11" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Alaplap: MSI MAG B550" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Tárhely: 1TB NVMe SSD" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Ház: Lian Li PC-O11" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
                                 </StackPanel>
                                 
                                 <!-- Price Info -->
-                                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                    <Border Background="#0D66D0" CornerRadius="6" Padding="16,8,16,8">
-                                        <TextBlock Text="435,000 Ft" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <Border Background="#0D66D0" CornerRadius="8" Padding="30,14,30,14">
+                                        <TextBlock Text="435,000 Ft" FontSize="22" FontWeight="Bold" Foreground="White"/>
                                     </Border>
                                 </StackPanel>
                             </Grid>
@@ -238,16 +190,16 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <TextBlock Grid.Column="0" Text="Teljesítmény:" FontSize="14" Foreground="#999999" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="0" Text="Teljesítmény:" FontSize="16" Foreground="#999999" VerticalAlignment="Center" Margin="0,0,15,0"/>
                                 <Grid Grid.Column="1" VerticalAlignment="Center">
-                                    <ProgressBar Value="85" Maximum="100" Height="8" Background="#333333" Foreground="#0D66D0"/>
-                                    <TextBlock Text="85/100" FontSize="12" Foreground="#CCCCCC" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+                                    <ProgressBar Value="85" Maximum="100" Height="12" Background="#333333" Foreground="#0D66D0"/>
+                                    <TextBlock Text="85/100" FontSize="14" Foreground="#CCCCCC" HorizontalAlignment="Right" Margin="0,16,0,0"/>
                                 </Grid>
                             </Grid>
                         </Grid>
                     </Border>
                       <!-- Sample Item 2 -->
-                    <Border Style="{StaticResource ConfigItem}" MouseUp="ConfigItem_Click" Tag="2" Padding="20">
+                    <Border Style="{StaticResource ConfigItem}" MouseUp="ConfigItem_Click" Tag="2" Padding="35">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -268,9 +220,6 @@
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource IconButton}" Click="EditConfig_Click" Tag="2">
-                                        <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
-                                    </Button>
                                     <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="2">
                                         <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
                                     </Button>
@@ -300,8 +249,8 @@
                                 </StackPanel>
                                 
                                 <!-- Price Info -->
-                                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                    <Border Background="#0D66D0" CornerRadius="6" Padding="16,8,16,8">
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <Border Background="#0D66D0" CornerRadius="6" Padding="25,12,25,12">
                                         <TextBlock Text="225,000 Ft" FontSize="18" FontWeight="Bold" Foreground="White"/>
                                     </Border>
                                 </StackPanel>
@@ -323,7 +272,7 @@
                         </Grid>
                     </Border>
                       <!-- Sample Item 3 -->
-                    <Border Style="{StaticResource ConfigItem}" MouseUp="ConfigItem_Click" Tag="3" Padding="20">
+                    <Border Style="{StaticResource ConfigItem}" MouseUp="ConfigItem_Click" Tag="3" Padding="35">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -344,9 +293,6 @@
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource IconButton}" Click="EditConfig_Click" Tag="3">
-                                        <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
-                                    </Button>
                                     <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="3">
                                         <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
                                     </Button>
@@ -376,8 +322,8 @@
                                 </StackPanel>
                                 
                                 <!-- Price Info -->
-                                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
-                                    <Border Background="#0D66D0" CornerRadius="6" Padding="16,8,16,8">
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <Border Background="#0D66D0" CornerRadius="6" Padding="25,12,25,12">
                                         <TextBlock Text="750,000 Ft" FontSize="18" FontWeight="Bold" Foreground="White"/>
                                     </Border>
                                 </StackPanel>
@@ -403,7 +349,7 @@
         </ScrollViewer>
         
         <!-- Empty State -->
-        <Grid Grid.Row="2" x:Name="EmptyState" Visibility="Collapsed">
+        <Grid Grid.Row="2" Grid.Column="1" x:Name="EmptyState" Visibility="Collapsed">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="&#xE9CE;" FontFamily="Segoe MDL2 Assets" FontSize="48" Foreground="#555555" HorizontalAlignment="Center"/>
                 <TextBlock Text="Nincsenek mentett konfigurációk" FontSize="20" Foreground="#AAAAAA" Margin="0,16,0,8" HorizontalAlignment="Center"/>
