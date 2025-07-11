@@ -158,8 +158,8 @@ namespace PC_Configurator.Views.User
         {
             var regWin = new RegistrationWindow();
             regWin.Owner = this.Owner;
-            regWin.Show();
             this.Close();
+            regWin.ShowDialog();
         }
 
         private void EmailTextBox_KeyDown(object sender, KeyEventArgs e)

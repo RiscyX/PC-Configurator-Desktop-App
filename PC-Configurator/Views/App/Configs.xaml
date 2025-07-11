@@ -146,17 +146,19 @@
                                     <TextBlock Text="Mentve: 2025.06.20. 15:30" FontSize="14" Foreground="#999999" Margin="0,8,0,0"/>
                                 </StackPanel>
                                 
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="1" Width="48" Height="48">
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
+                                    <Border Background="#0D66D0" CornerRadius="8" Padding="20,10,20,10" Margin="0,0,10,0">
+                                        <TextBlock Text="435,000 Ft" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                                    </Border>
+                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="1" Width="42" Height="42">
                                         <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                                     </Button>
                                 </StackPanel>
                             </Grid>
                             
                             <!-- Configuration Details -->
-                            <Grid Grid.Row="1" Margin="0,30,0,30">
+                            <Grid Grid.Row="1" Margin="0,30,0,20">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
@@ -175,11 +177,9 @@
                                     <TextBlock Text="Ház: Lian Li PC-O11" FontSize="16" Foreground="#CCCCCC" Margin="0,0,0,12"/>
                                 </StackPanel>
                                 
-                                <!-- Price Info -->
+                                <!-- Price Info (üres, mivel már az ár a fejlécbe került) -->
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
-                                    <Border Background="#0D66D0" CornerRadius="8" Padding="30,14,30,14">
-                                        <TextBlock Text="435,000 Ft" FontSize="22" FontWeight="Bold" Foreground="White"/>
-                                    </Border>
+                                    <!-- Az ár már a fejlécben van -->
                                 </StackPanel>
                             </Grid>
                             
@@ -219,8 +219,11 @@
                                     <TextBlock Text="Mentve: 2025.06.18. 10:15" FontSize="12" Foreground="#999999" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="2">
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
+                                    <Border Background="#0D66D0" CornerRadius="6" Padding="16,8,16,8" Margin="0,0,10,0">
+                                        <TextBlock Text="225,000 Ft" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                                    </Border>
+                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="2" Width="38" Height="38">
                                         <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
                                     </Button>
                                 </StackPanel>
@@ -229,7 +232,6 @@
                             <!-- Configuration Details -->
                             <Grid Grid.Row="1" Margin="0,16,0,16">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
@@ -248,11 +250,9 @@
                                     <TextBlock Text="Ház: Fractal Design Meshify" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
                                 </StackPanel>
                                 
-                                <!-- Price Info -->
+                                <!-- Price Info (üres, mivel már az ár a fejlécbe került) -->
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
-                                    <Border Background="#0D66D0" CornerRadius="6" Padding="25,12,25,12">
-                                        <TextBlock Text="225,000 Ft" FontSize="18" FontWeight="Bold" Foreground="White"/>
-                                    </Border>
+                                    <!-- Az ár már a fejlécben van -->
                                 </StackPanel>
                             </Grid>
                             
@@ -292,8 +292,11 @@
                                     <TextBlock Text="Mentve: 2025.06.15. 09:45" FontSize="12" Foreground="#999999" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="3">
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right">
+                                    <Border Background="#0D66D0" CornerRadius="6" Padding="16,8,16,8" Margin="0,0,10,0">
+                                        <TextBlock Text="750,000 Ft" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                                    </Border>
+                                    <Button Style="{StaticResource DeleteButton}" Click="DeleteConfig_Click" Tag="3" Width="38" Height="38">
                                         <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
                                     </Button>
                                 </StackPanel>
@@ -302,7 +305,6 @@
                             <!-- Configuration Details -->
                             <Grid Grid.Row="1" Margin="0,16,0,16">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
@@ -321,11 +323,9 @@
                                     <TextBlock Text="Ház: be quiet! Dark Base 700" FontSize="14" Foreground="#CCCCCC" Margin="0,0,0,6"/>
                                 </StackPanel>
                                 
-                                <!-- Price Info -->
+                                <!-- Price Info (üres, mivel már az ár a fejlécbe került) -->
                                 <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
-                                    <Border Background="#0D66D0" CornerRadius="6" Padding="25,12,25,12">
-                                        <TextBlock Text="750,000 Ft" FontSize="18" FontWeight="Bold" Foreground="White"/>
-                                    </Border>
+                                    <!-- Az ár már a fejlécben van -->
                                 </StackPanel>
                             </Grid>
                             

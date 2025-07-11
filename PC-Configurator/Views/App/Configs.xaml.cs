@@ -409,21 +409,6 @@ namespace PC_Configurator.Views.App
 
                 StackPanel buttonsPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
                 
-                Button editButton = new Button
-                {
-                    Style = (Style)Resources["IconButton"],
-                    Tag = config.Id,
-                };
-                editButton.Click += EditConfig_Click;
-                TextBlock editIcon = new TextBlock
-                {
-                    Text = "\uE70F", // Szerkesztés ikon
-                    FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                    FontSize = 20 // Nagyobb ikon méret
-                };
-                editButton.Content = editIcon;
-                editButton.Padding = new Thickness(12); // Nagyobb padding a gombnak
-                
                 Button deleteButton = new Button
                 {
                     Style = (Style)Resources["DeleteButton"],
@@ -438,8 +423,6 @@ namespace PC_Configurator.Views.App
                     FontSize = 20 // Nagyobb ikon méret
                 };
                 deleteButton.Content = deleteIcon;
-                
-                buttonsPanel.Children.Add(editButton);
                 buttonsPanel.Children.Add(deleteButton);
                 Grid.SetColumn(buttonsPanel, 1);
 
@@ -634,49 +617,7 @@ namespace PC_Configurator.Views.App
             }
         }
 
-        private void EditConfig_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            int configId = (int)button.Tag;
-            
-            // Az esemény terjedésének megakadályozása, hogy ne nyíljon meg a konfiguráció részletei is
-            e.Handled = true;
-            
-            try
-            {
-                // A vw_FullConfigurations nézetből már betöltöttük a konfigurációt és komponenseit
-                // így egyből megnyithatnánk szerkesztésre, de a szerkesztéshez célszerű frissíteni az adatokat
-                var config = ConfigurationModel.LoadFromDatabase(configId);
-                
-                if (config != null)
-                {
-                    // ConfigBuilder oldal megnyitása szerkesztési módban
-                    var configBuilder = new ConfigBuilder();
-                    configBuilder.LoadConfiguration(config);
-                    
-                    // A főablak megkeresése
-                    var dashboard = Window.GetWindow(this) as Dashboard;
-                    if (dashboard != null)
-                    {
-                        // A tartalmi terület frissítése a ConfigBuilder-rel
-                        dashboard.MainContentArea.Content = configBuilder;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Nem sikerült megtalálni a főablakot.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show($"A {configId} azonosítójú konfiguráció nem található.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Hiba a konfiguráció szerkesztése közben: {ex.Message}");
-                MessageBox.Show($"Hiba történt a konfiguráció szerkesztése közben: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+       
 
         private void DeleteConfig_Click(object sender, RoutedEventArgs e)
         {

@@ -10,11 +10,11 @@ none
 false
 TRACE
 D:\Projects\PC-Configurator-Desktop-App\PC-Configurator\App.xaml
-1219584333
+18-1932406128
 
-51579654133
-13-1310406943
-MainWindow.xaml;
+39-607184001
+14-207034072
+MainWindow.xaml;Views\App\AddComponents.xaml;Views\App\AdminSettings.xaml;Views\App\Components.xaml;Views\App\ConfigBuilder.xaml;Views\App\Configs.xaml;Views\App\Dashboard.xaml;Views\App\Profile.xaml;Views\App\Users.xaml;Views\Forms\Case.xaml;Views\Forms\CPU.xaml;Views\Forms\GPU.xaml;Views\Forms\Motherboard.xaml;Views\Forms\PSU.xaml;Views\Forms\RAM.xaml;Views\Forms\Storage.xaml;Views\User\LoginWindow.xaml;Views\User\RegistrationWindow.xaml;
 
-True
+False
 

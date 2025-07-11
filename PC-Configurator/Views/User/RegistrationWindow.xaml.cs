@@ -80,9 +80,12 @@ namespace PC_Configurator.Views.User
             {
                 MessageBox.Show("Sikeres regisztráció! Kérlek jelentkezz be.", "Regisztráció", MessageBoxButton.OK, MessageBoxImage.Information);
                 var loginWin = new LoginWindow();
+                
+                // Módosítás: A Show() helyett ShowDialog() használata
+                // És a Close() metódus hívása előtt
                 loginWin.Owner = this.Owner;
-                loginWin.Show();
                 this.Close();
+                loginWin.ShowDialog();
             }
             else
             {
@@ -157,8 +160,8 @@ namespace PC_Configurator.Views.User
         {
             var loginWin = new LoginWindow();
             loginWin.Owner = this.Owner;
-            loginWin.Show();
             this.Close();
+            loginWin.ShowDialog();
         }
     }
 }
